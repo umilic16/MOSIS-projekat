@@ -36,7 +36,13 @@ fun Register(navController: NavController) {
             .padding(PaddingMedium)
     ) {
         Spacer(modifier = Modifier.padding(PaddingExtra))
+        Text(
+            text = "Create your account",
+            color = DefaultWhite,
+            fontSize = 22.sp,
+            modifier = Modifier.fillMaxWidth())
         //input boxes i forgot pass
+        Spacer(modifier = Modifier.padding(PaddingMedium))
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             //zbog testiranja
@@ -55,7 +61,7 @@ fun Register(navController: NavController) {
                 CustomTextField(
                     text = username.value,
                     onValueChange = { username.value = it },
-                    hint = "Password",
+                    hint = "Username",
                     //keyboardType = KeyboardType.Password
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
@@ -63,19 +69,19 @@ fun Register(navController: NavController) {
                 CustomTextField(
                     text = password.value,
                     onValueChange = { password.value = it },
-                    hint = "Email address",
+                    hint = "Password",
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //repeat password
                 CustomTextField(
                     text = repeatedPassword.value,
                     onValueChange = { repeatedPassword.value = it },
-                    hint = "Password",
+                    hint = "Repeat password",
                     //keyboardType = KeyboardType.Password
                 )
                 Spacer(modifier = Modifier.padding(PaddingLarge))
                 Button(
-                    onClick = { navController.navigate("Login") },
+                    onClick = { navController.navigate("Home") },
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
                         .height(50.dp)

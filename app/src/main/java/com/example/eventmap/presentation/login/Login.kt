@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -22,7 +23,6 @@ import com.example.eventmap.presentation.theme.ui.*
 fun Login(navController: NavController) {
     val userName = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
-
     //val passwordVisibility = remember { mutableStateOf(false) }
     //val focusRequester = remember { FocusRequester() }
     //ceo container
@@ -82,7 +82,7 @@ fun Login(navController: NavController) {
                 }
                 Spacer(modifier = Modifier.padding(PaddingLarge))
                 Button(
-                    onClick = { TODO() },
+                    onClick = { navController.navigate("Home") },
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
                         .height(50.dp)
@@ -95,7 +95,9 @@ fun Login(navController: NavController) {
     }
     //Create account
     Box(
-        modifier = Modifier.fillMaxSize().padding(horizontal = PaddingMedium, vertical = PaddingLarge),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = PaddingMedium, vertical = PaddingLarge),
         contentAlignment = Alignment.BottomStart){
         Text(
             text = "Create an account",
