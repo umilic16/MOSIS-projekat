@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.sp
 import com.example.eventmap.presentation.theme.ui.DarkText
 import com.example.eventmap.presentation.theme.ui.DefaultWhite
@@ -21,28 +22,10 @@ fun CustomTextField(
     onValueChange: (String) -> Unit,
     isError: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     colors: TextFieldColors = TextFieldDefaults.textFieldColors(
         textColor= DarkText,
-        /*disabledTextColor= DefaultWhite,*/
-        backgroundColor= DefaultWhite,/*
-        cursorColor= DefaultWhite,
-        errorCursorColor= DefaultWhite,
-        focusedBorderColor= DefaultWhite,
-        unfocusedBorderColor= DefaultWhite,
-        disabledBorderColor= DefaultWhite,
-        errorBorderColor= DefaultWhite,
-        leadingIconColor= DefaultWhite,
-        disabledLeadingIconColor= DefaultWhite,
-        errorLeadingIconColor= DefaultWhite,
-        trailingIconColor= DefaultWhite,
-        disabledTrailingIconColor= DefaultWhite,
-        errorTrailingIconColor= DefaultWhite,
-        focusedLabelColor= DefaultWhite,
-        unfocusedLabelColor= DefaultWhite,
-        disabledLabelColor= DefaultWhite,
-        errorLabelColor= DefaultWhite,
-        placeholderColor= DefaultWhite,
-        disabledPlaceholderColor= DefaultWhite*/
+        backgroundColor= DefaultWhite,
     )
 ) {
     TextField(
@@ -60,6 +43,7 @@ fun CustomTextField(
         ),
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
-        colors = colors
+        colors = colors,
+        visualTransformation = visualTransformation
     )
 }

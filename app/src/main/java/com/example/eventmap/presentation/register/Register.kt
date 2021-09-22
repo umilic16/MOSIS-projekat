@@ -9,6 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.ui.unit.sp
@@ -61,8 +63,7 @@ fun Register(navController: NavController) {
                 CustomTextField(
                     text = username.value,
                     onValueChange = { username.value = it },
-                    hint = "Username",
-                    //keyboardType = KeyboardType.Password
+                    hint = "Username"
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //password
@@ -70,6 +71,8 @@ fun Register(navController: NavController) {
                     text = password.value,
                     onValueChange = { password.value = it },
                     hint = "Password",
+                    keyboardType = KeyboardType.Password,
+                    visualTransformation = PasswordVisualTransformation()
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //repeat password
@@ -77,7 +80,8 @@ fun Register(navController: NavController) {
                     text = repeatedPassword.value,
                     onValueChange = { repeatedPassword.value = it },
                     hint = "Repeat password",
-                    //keyboardType = KeyboardType.Password
+                    keyboardType = KeyboardType.Password,
+                    visualTransformation = PasswordVisualTransformation()
                 )
                 Spacer(modifier = Modifier.padding(PaddingLarge))
                 Button(
