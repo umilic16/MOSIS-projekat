@@ -1,4 +1,4 @@
-package com.example.eventmap.presentation.theme
+package com.example.eventmap.presentation.theme.ui
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes
