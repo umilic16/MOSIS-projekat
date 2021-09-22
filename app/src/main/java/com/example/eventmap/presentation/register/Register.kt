@@ -57,6 +57,7 @@ fun Register(navController: NavController) {
                     text = email.value,
                     onValueChange = { email.value = it },
                     hint = "Email address",
+                    keyboardType = KeyboardType.Email
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //username

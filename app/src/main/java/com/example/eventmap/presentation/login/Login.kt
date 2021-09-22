@@ -67,7 +67,7 @@ fun Login(navController: NavController) {
                 CustomTextField(
                     text = userName.value,
                     onValueChange = { userName.value = it },
-                    hint = "Email address",
+                    hint = "Username",
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //password
