@@ -1,14 +1,18 @@
 package com.example.eventmap.presentation.register
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
+import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -16,17 +20,23 @@ import androidx.navigation.NavController
 import androidx.compose.ui.unit.sp
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.presentation.theme.ui.*
+import com.example.eventmap.presentation.utils.checkIfLoggedIn
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 
 @Composable
 fun Register(navController: NavController) {
     val email = remember { mutableStateOf("") }
-    val username = remember { mutableStateOf("") }
+    //val username = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val repeatedPassword = remember { mutableStateOf("")}
-
-    //val passwordVisibility = remember { mutableStateOf(false) }
-    //val focusRequester = remember { FocusRequester() }
+    val auth = FirebaseAuth.getInstance()
+    val context = LocalContext.current
     //ceo container
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -41,7 +51,7 @@ fun Register(navController: NavController) {
         Text(
             text = "Create your account",
             color = DefaultWhite,
-            fontSize = 22.sp,
+            fontSize = 20.sp,
             modifier = Modifier.fillMaxWidth())
         //input boxes i forgot pass
         Spacer(modifier = Modifier.padding(PaddingMedium))
@@ -58,13 +68,6 @@ fun Register(navController: NavController) {
                     onValueChange = { email.value = it },
                     hint = "Email address",
                     keyboardType = KeyboardType.Email
-                )
-                Spacer(modifier = Modifier.padding(PaddingSmall))
-                //username
-                CustomTextField(
-                    text = username.value,
-                    onValueChange = { username.value = it },
-                    hint = "Username"
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //password
@@ -86,7 +89,34 @@ fun Register(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.padding(PaddingLarge))
                 Button(
-                    onClick = { navController.navigate("Home") },
+                    onClick = {
+                        if (email.value.isEmpty() || password.value.isEmpty()) {
+                            Toast.makeText(
+                                context,
+                                "Email and password cant be empty!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else if (password.value != repeatedPassword.value) {
+                            Toast.makeText(
+                                context,
+                                "Passwords dont match!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            auth.createUserWithEmailAndPassword(email.value, password.value)
+                                .addOnCompleteListener() { task ->
+                                    if (task.isSuccessful) {
+                                        navController.navigate("Home")
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "User already exists",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
                         .height(50.dp)
@@ -99,7 +129,9 @@ fun Register(navController: NavController) {
     }
     //Sing in
     Box(
-        modifier = Modifier.fillMaxSize().padding(horizontal = PaddingMedium, vertical = PaddingLarge),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = PaddingMedium, vertical = PaddingLarge),
         contentAlignment = Alignment.BottomStart){
         Text(
             text = "Already have an account?",
