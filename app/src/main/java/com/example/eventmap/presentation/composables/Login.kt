@@ -67,6 +67,7 @@ fun Login(navController: NavController) {
                     text = email.value,
                     onValueChange = { email.value = it },
                     hint = "Email",
+                    keyboardType = KeyboardType.Email
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //password

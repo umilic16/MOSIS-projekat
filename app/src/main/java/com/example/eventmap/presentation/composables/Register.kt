@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.sp
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.*
+import com.example.eventmap.presentation.utils.saveUser
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
 
 @Composable
@@ -33,7 +33,6 @@ fun Register(navController: NavController) {
     val repeatedPassword = remember { mutableStateOf("")}
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
-    val dbRefUsers = FirebaseFirestore.getInstance().collection("users-test");
     //ceo container
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -103,16 +102,16 @@ fun Register(navController: NavController) {
                             auth.createUserWithEmailAndPassword(email.value, password.value)
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
-                                        dbRefUsers.add(User(
+                                        saveUser(
+                                            //uid usera je uid dokumenta u kolekciji users
                                             auth.currentUser?.uid.toString(),
-                                            auth.currentUser?.email.toString(),
-                                            ""
-                                        ))
+                                            User(email.value, password = password.value)
+                                        )
                                         navController.navigate("Home")
                                     } else {
                                         Toast.makeText(
                                             context,
-                                            "User already exists",
+                                            "Authentication error",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
