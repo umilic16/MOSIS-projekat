@@ -17,9 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.eventmap.presentation.theme.ui.DefaultBlue
-import com.example.eventmap.presentation.theme.ui.DefaultWhite
-import com.example.eventmap.presentation.theme.ui.LightGray
+import com.example.eventmap.presentation.theme.ui.*
 
 @Composable
 fun BottomNavBar(
@@ -43,7 +41,7 @@ fun BottomNavBar(
                     selected = selected,
                     onClick = { onItemClick(item) },
                     selectedContentColor = DefaultBlue,
-                    unselectedContentColor = LightGray,
+                    unselectedContentColor = ButtonGray,
                     icon = {
                         Column(horizontalAlignment = CenterHorizontally) {
                             Icon(imageVector = item.icon, contentDescription = "icon")

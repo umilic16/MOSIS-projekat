@@ -64,7 +64,7 @@ fun Leaderboard(navController: NavController) {
 fun getUsersByPoints(): List<String> {
     val db = FirebaseFirestore.getInstance()
     val docRef = db.collection("users-test2")
-    val usersByPoints = mutableListOf<String>("testiranje@mail.com","neki@mail.com","mail123@yahoo.com")
+    val usersByPoints = mutableListOf<String>("mail123@gmai.com","elfak@elfak.rs","sip@sip.rs","testiranje@mail.com","neki@mail.com","mail123@yahoo.com")
     docRef.orderBy("points").get().addOnSuccessListener { result ->
             for (document in result) {
                 val email = document.data.get("email").toString()

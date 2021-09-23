@@ -1,11 +1,13 @@
 package com.example.eventmap.presentation.utils
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.eventmap.presentation.MainActivityViewModel
 import com.example.eventmap.presentation.composables.AccountView
 import com.example.eventmap.presentation.composables.CreateEventView
 import com.example.eventmap.presentation.composables.Leaderboard
@@ -15,7 +17,7 @@ import com.example.eventmap.presentation.composables.Register
 import com.example.eventmap.presentation.composables.Home
 
 @Composable
-fun Navigation(navController: NavController) {
+fun Navigation(navController: NavController, viewModel: MainActivityViewModel) {
    // val navController = rememberNavController()
     NavHost(navController = navController as NavHostController,
         startDestination = if (checkIfLoggedIn()){
@@ -28,7 +30,7 @@ fun Navigation(navController: NavController) {
             composable(route = "Login", content = { Login(navController = navController) })
             composable(route = "Register", content = { Register(navController = navController) })
             composable(route = "Home", content = { Home(navController = navController) })
-            composable(route = "Map", content = { MapView(navController = navController) })
+            composable(route = "Map", content = { MapView(navController = navController, viewModel) })
             composable(route = "CreateEvent", content = { CreateEventView(navController = navController) })
             composable(route = "Leaderboard", content = { Leaderboard(navController = navController) })
             composable(route = "Account", content = { AccountView(navController = navController) })
