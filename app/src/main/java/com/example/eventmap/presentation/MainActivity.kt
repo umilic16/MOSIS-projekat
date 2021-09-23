@@ -7,30 +7,21 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.eventmap.presentation.theme.ui.DefaultBlue
-import com.example.eventmap.presentation.theme.ui.DefaultWhite
 import com.example.eventmap.presentation.theme.ui.EventMapTheme
 import com.example.eventmap.presentation.utils.BottomNavBar
 import com.example.eventmap.presentation.utils.BottomNavItem
 import com.example.eventmap.presentation.utils.Navigation
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.maps.model.LatLng
-import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<MainActivityViewModel>()
@@ -135,7 +126,7 @@ class MainActivity : ComponentActivity() {
                         val lastKnownLocation = task.result
 
                         if (lastKnownLocation != null) {
-                            viewModel.currentUserGeoCOord(
+                            viewModel.currentUserGeoCoord(
                                 LatLng(
                                     lastKnownLocation.altitude,
                                     lastKnownLocation.longitude

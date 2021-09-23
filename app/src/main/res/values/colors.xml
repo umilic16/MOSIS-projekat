@@ -9,7 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="DefaultWhite">#FFF1F4F8</color>
     <color name="DarkBlue">#FF0f4070</color>
-    <color name="ButtonGray">#FFA1A1A1</color>
+    <color name="ButtonGray">#FF707070</color>
     <color name="HintGray">#FF575757</color>
     <color name="DefaultBlue">#FF5992CB</color>
     <color name="LightGray">#FFD3D9DF</color>

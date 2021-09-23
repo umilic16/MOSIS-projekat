@@ -53,7 +53,7 @@ fun MapView(navController: NavController, viewModel: MainActivityViewModel) {
     val destination = if (newDestinationSelected.value) LatLng(
         viewModel.selectedLat.value,
         viewModel.selectedLng.value
-    ) else LatLng(-1.491, 38.309)
+    ) else LatLng(43.32472, 21.90333)
 
     Surface(color = DarkBlue) {
 
@@ -69,12 +69,12 @@ fun MapView(navController: NavController, viewModel: MainActivityViewModel) {
 fun MapViewContainer(viewModel: MainActivityViewModel, destination: LatLng) {
 
     val mapView = rememberMapViewLifecycle()
-    Log.d("MAPDEBUG","MAPVIEWCONTAINER ENTER")
+    //Log.d("MAPDEBUG","MAPVIEWCONTAINER ENTER")
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView({ mapView }) {
             CoroutineScope(Dispatchers.Main).launch {
                 val map = mapView.awaitMap()
-                Log.d("MAPDEBUG",map.toString())
+               // Log.d("MAPDEBUG",map.toString())
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(destination, 6f))
 
                 /*val markerOptions =
@@ -98,5 +98,5 @@ fun MapViewContainer(viewModel: MainActivityViewModel, destination: LatLng) {
             }
         }
     }
-    Log.d("MAPDEBUG","MAPVIEWCONTAINER EXIT")
+   // Log.d("MAPDEBUG","MAPVIEWCONTAINER EXIT")
 }
