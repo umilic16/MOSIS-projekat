@@ -39,12 +39,22 @@ fun AccountView(navController: NavController) {
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
     val username = remember { mutableStateOf("") }
-    //val email = remember { mutableStateOf("") }
-    //val numOfFriends = remember { mutableStateOf("") }
-    //val numOfEvents = remember { mutableStateOf("") }
-    //val points = remember { mutableStateOf("") }
+    val email = remember { mutableStateOf("") }
+    val numOfFriends = remember { mutableStateOf("") }
+    val numOfEvents = remember { mutableStateOf("") }
+    val points = remember { mutableStateOf("") }
     //val user = FirebaseFirestore.getInstance().collection("users-test2").document(auth.currentUser?.uid.toString()).get()
     //Log.d("ALOOOOO", "EJ")
+    val db = FirebaseFirestore.getInstance()
+    val docRef = db.collection("users-test2").document(auth.currentUser?.uid.toString())
+    docRef.get().addOnSuccessListener { documentSnapshot ->
+        username.value = documentSnapshot.data?.get("username").toString()
+        email.value = documentSnapshot.data?.get("email").toString()
+        numOfFriends.value = documentSnapshot.data?.get("numOfFriends").toString()
+        numOfEvents.value = documentSnapshot.data?.get("numOfEvents").toString()
+        points.value = documentSnapshot.data?.get("points").toString()
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -78,7 +88,7 @@ fun AccountView(navController: NavController) {
                         RoundedCornerShape(4.dp)
                     )) {
                     Text(
-                        text = "EMAIl",
+                        text = email.value,
                         textAlign = TextAlign.Start,
                         modifier = Modifier
                             .padding(PaddingMedium)
@@ -94,7 +104,7 @@ fun AccountView(navController: NavController) {
                         RoundedCornerShape(4.dp)
                     )) {
                     Text(
-                        text = "FRIENDS",
+                        text = "Friends: ${numOfFriends.value}",
                         textAlign = TextAlign.Start,
                         modifier = Modifier
                             .padding(PaddingMedium)
@@ -110,7 +120,7 @@ fun AccountView(navController: NavController) {
                         RoundedCornerShape(4.dp)
                     )) {
                     Text(
-                        text = "EVENTS",
+                        text = "Events: ${numOfEvents.value}",
                         textAlign = TextAlign.Start,
                         modifier = Modifier
                             .padding(PaddingMedium)
@@ -126,7 +136,7 @@ fun AccountView(navController: NavController) {
                         RoundedCornerShape(10.dp)
                     )) {
                     Text(
-                        text = "POINTS",
+                        text = "Points: ${points.value}",
                         textAlign = TextAlign.Start,
                         modifier = Modifier
                             .padding(PaddingMedium)
