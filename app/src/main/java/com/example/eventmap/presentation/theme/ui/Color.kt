@@ -3,7 +3,7 @@ package com.example.eventmap.presentation.theme.ui
 import androidx.compose.ui.graphics.Color
 
 val DefaultWhite = Color(0xFFF1F4F8)
-val DarkBlue = Color(0xFF082542)
+val DarkBlue = Color(0xFF0f4070)
 val DefaultBlue = Color(0xFF5992CB)
 val LightGray = Color(0xFFD3D9DF)
 val HintGray = Color(0xFF575757)

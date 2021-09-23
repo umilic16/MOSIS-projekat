@@ -5,10 +5,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.eventmap.presentation.theme.ui.DarkText
 import com.example.eventmap.presentation.theme.ui.DefaultWhite
@@ -26,7 +28,8 @@ fun CustomTextField(
     colors: TextFieldColors = TextFieldDefaults.textFieldColors(
         textColor= DarkText,
         backgroundColor= DefaultWhite,
-    )
+    ),
+    modifier: Modifier = Modifier
 ) {
     TextField(
         value = text,
@@ -42,7 +45,7 @@ fun CustomTextField(
             keyboardType = keyboardType
         ),
         singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().shadow(elevation = 5.dp),
         colors = colors,
         visualTransformation = visualTransformation
     )
