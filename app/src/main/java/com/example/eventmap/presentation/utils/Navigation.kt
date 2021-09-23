@@ -1,6 +1,8 @@
 package com.example.eventmap.presentation.utils
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -13,9 +15,9 @@ import com.example.eventmap.presentation.composables.Register
 import com.example.eventmap.presentation.composables.Home
 
 @Composable
-fun Navigation() {
-    val navController = rememberNavController()
-    NavHost(navController = navController,
+fun Navigation(navController: NavController) {
+   // val navController = rememberNavController()
+    NavHost(navController = navController as NavHostController,
         startDestination = if (checkIfLoggedIn()){
             "Login"
         }
