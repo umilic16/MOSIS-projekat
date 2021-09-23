@@ -4,6 +4,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -70,59 +71,99 @@ fun AccountView(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //password
-                Column(modifier = Modifier.fillMaxWidth().background(DefaultWhite).clip(
-                    RoundedCornerShape(4.dp))) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(DefaultWhite)
+                    .clip(
+                        RoundedCornerShape(4.dp)
+                    )) {
                     Text(
                         text = "EMAIl",
                         textAlign = TextAlign.Start,
-                        modifier = Modifier.padding(PaddingMedium).clip(RoundedCornerShape(10.dp))
+                        modifier = Modifier
+                            .padding(PaddingMedium)
+                            .clip(RoundedCornerShape(10.dp))
                     )
                 }
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //password
-                Column(modifier = Modifier.fillMaxWidth().background(DefaultWhite).clip(
-                    RoundedCornerShape(4.dp))) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(DefaultWhite)
+                    .clip(
+                        RoundedCornerShape(4.dp)
+                    )) {
                     Text(
                         text = "FRIENDS",
                         textAlign = TextAlign.Start,
-                        modifier = Modifier.padding(PaddingMedium).clip(RoundedCornerShape(10.dp))
+                        modifier = Modifier
+                            .padding(PaddingMedium)
+                            .clip(RoundedCornerShape(10.dp))
                     )
                 }
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //password
-                Column(modifier = Modifier.fillMaxWidth().background(DefaultWhite).clip(
-                    RoundedCornerShape(4.dp))) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(DefaultWhite)
+                    .clip(
+                        RoundedCornerShape(4.dp)
+                    )) {
                     Text(
                         text = "EVENTS",
                         textAlign = TextAlign.Start,
-                        modifier = Modifier.padding(PaddingMedium).clip(RoundedCornerShape(10.dp))
+                        modifier = Modifier
+                            .padding(PaddingMedium)
+                            .clip(RoundedCornerShape(10.dp))
                     )
                 }
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //password
-                Column(modifier = Modifier.fillMaxWidth().background(DefaultWhite).clip(
-                    RoundedCornerShape(10.dp))) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(DefaultWhite)
+                    .clip(
+                        RoundedCornerShape(10.dp)
+                    )) {
                     Text(
                         text = "POINTS",
                         textAlign = TextAlign.Start,
-                        modifier = Modifier.padding(PaddingMedium).clip(RoundedCornerShape(10.dp))
+                        modifier = Modifier
+                            .padding(PaddingMedium)
+                            .clip(RoundedCornerShape(10.dp))
                     )
                 }
                 Spacer(modifier = Modifier.padding(PaddingLarge))
-                Button(
-                    onClick = {
-                    },
-                    enabled = false,
-                    modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                        .height(50.dp)
-                        .shadow(elevation = 5.dp)
-                        .background(DefaultBlue)
-                ) {
-                    Text(text = "Save", fontSize = 18.sp, color = DefaultBlue, fontWeight = FontWeight.Bold)
+                Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = {
+                        },
+                        enabled = false,
+                        modifier = Modifier
+                            .fillMaxWidth(0.3f)
+                            .height(40.dp)
+                            .shadow(elevation = 5.dp)
+                            .background(DefaultBlue)
+                    ) {
+                        Text(text = "Save", fontSize = 16.sp, color = DefaultBlue, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
-        Spacer(modifier = Modifier.padding(PaddingExtra))
+    }
+    //Create account
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = PaddingMedium, vertical = 80.dp),
+        contentAlignment = Alignment.BottomEnd){
+        Text(
+            text = "Sign out",
+            color = DefaultWhite,
+            modifier = Modifier.clickable(onClick = {
+                auth.signOut()
+                navController.navigate("Login") {
+                }
+            }))
     }
 }
