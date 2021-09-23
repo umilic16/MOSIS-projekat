@@ -22,8 +22,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //zbog testiranja
-        //val auth = FirebaseAuth.getInstance()
-        //auth.signOut()
+        val auth = FirebaseAuth.getInstance()
+        auth.signOut()
         setContent {
             EventMapTheme {
                 Surface(

@@ -1,5 +1,6 @@
 package com.example.eventmap.presentation.composables
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,8 +19,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.ui.unit.sp
 import com.example.eventmap.components.CustomTextField
+import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.*
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 @Composable
@@ -30,6 +33,7 @@ fun Register(navController: NavController) {
     val repeatedPassword = remember { mutableStateOf("")}
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
+    val dbRefUsers = FirebaseFirestore.getInstance().collection("users-test");
     //ceo container
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -99,6 +103,11 @@ fun Register(navController: NavController) {
                             auth.createUserWithEmailAndPassword(email.value, password.value)
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
+                                        dbRefUsers.add(User(
+                                            auth.currentUser?.uid.toString(),
+                                            auth.currentUser?.email.toString(),
+                                            ""
+                                        ))
                                         navController.navigate("Home")
                                     } else {
                                         Toast.makeText(

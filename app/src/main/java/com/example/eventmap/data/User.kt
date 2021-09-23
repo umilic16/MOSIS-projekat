@@ -1,12 +1,12 @@
 package com.example.eventmap.data
 
 data class User(
+    val userId: String,
     val email: String,
     val username: String,
-    val password: String,
-    val numOfFriends: Int,
-    val numOfEvents: Int,
-    val profilePicUrl: String
+    val numOfFriends: Int=0,
+    val numOfEvents: Int=0,
+    val points: Int=0
 )
 
 

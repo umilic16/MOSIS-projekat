@@ -26,10 +26,11 @@ fun CustomTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     colors: TextFieldColors = TextFieldDefaults.textFieldColors(
-        textColor= DarkText,
-        backgroundColor= DefaultWhite,
+        textColor = DarkText,
+        backgroundColor = DefaultWhite,
     ),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    readOnly: Boolean = false
 ) {
     TextField(
         value = text,
@@ -47,6 +48,7 @@ fun CustomTextField(
         singleLine = true,
         modifier = Modifier.fillMaxWidth().shadow(elevation = 5.dp),
         colors = colors,
-        visualTransformation = visualTransformation
+        visualTransformation = visualTransformation,
+        readOnly = readOnly
     )
 }
