@@ -68,7 +68,9 @@ fun getUsersByPoints(): List<String> {
     docRef.orderBy("points").get().addOnSuccessListener { result ->
             for (document in result) {
                 val email = document.data.get("email").toString()
-                Log.d("EmailRes", email)
+               // Log.d("EmailRes", email)
+                //SVE LEPO PRONALAZI
+                //ALI IZ NEKOG RAZLOGA NE DODAJE U LISTU
                 usersByPoints.add(document.data["email"].toString())
                 //Log.d("RES2", "${document.id} => ${document.data.get("username")}")
             }
