@@ -1,5 +1,8 @@
 package com.example.eventmap.presentation.composables
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
@@ -39,24 +42,26 @@ import java.lang.IllegalStateException
 import androidx.activity.viewModels
 import androidx.compose.material.Surface
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.core.content.ContextCompat
 import com.example.eventmap.presentation.theme.ui.DarkBlue
 import com.example.eventmap.presentation.utils.rememberMapViewLifecycle
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.maps.android.ktx.model.markerOptions
 
 @Composable
-fun MapView(navController: NavController, viewModel: MainActivityViewModel) {
+fun MapView(navController: NavController, viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient) {
     /*Box(modifier = Modifier
         .fillMaxSize()
         .padding(PaddingLarge), contentAlignment = Alignment.Center) {
     }*/
+    getCurrentLocation(viewModel, fusedLocationProviderClient)
     val newDestinationSelected = viewModel.isNewLocationSelected.observeAsState(false)
-
     val destination = if (newDestinationSelected.value) LatLng(
         viewModel.selectedLat.value,
         viewModel.selectedLng.value
     ) else LatLng(43.32472, 21.90333)
-
     Surface(color = DarkBlue) {
-
         MapViewContainer(
             viewModel = viewModel,
             destination = destination
@@ -67,7 +72,6 @@ fun MapView(navController: NavController, viewModel: MainActivityViewModel) {
 
 @Composable
 fun MapViewContainer(viewModel: MainActivityViewModel, destination: LatLng) {
-
     val mapView = rememberMapViewLifecycle()
     //Log.d("MAPDEBUG","MAPVIEWCONTAINER ENTER")
     Box(modifier = Modifier.fillMaxSize()) {
@@ -76,7 +80,11 @@ fun MapViewContainer(viewModel: MainActivityViewModel, destination: LatLng) {
                 val map = mapView.awaitMap()
                // Log.d("MAPDEBUG",map.toString())
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(destination, 6f))
-
+                //Log.d("CurrLoc", "(${viewModel.userCurrentLat.value}, ${viewModel.userCurrentLng.value})")
+                map.addMarker(markerOptions {
+                    this.title("Current location")
+                    this.position(LatLng(viewModel.userCurrentLat.value,viewModel.userCurrentLng.value))
+                })
                 /*val markerOptions =
                     MarkerOptions().title("Start position").position(viewModel.pickUp)
                 map.addMarker(markerOptions)
@@ -99,4 +107,26 @@ fun MapViewContainer(viewModel: MainActivityViewModel, destination: LatLng) {
         }
     }
    // Log.d("MAPDEBUG","MAPVIEWCONTAINER EXIT")
+}
+
+fun getCurrentLocation(viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient) {
+    try {
+        if (viewModel.locationPermissionGranted.value == true) {
+            val task = fusedLocationProviderClient.lastLocation
+            Log.d("LocDebug", task.toString())
+            task.addOnSuccessListener {
+                if (it != null) {
+                    viewModel.currentUserGeoCoord(
+                        LatLng(
+                            it.altitude,
+                            it.longitude
+                        )
+                    )
+                }
+            }
+        }
+    } catch (e: SecurityException) {
+        Log.d("Exception", "Exception:  $e.message.toString()")
+
+    }
 }

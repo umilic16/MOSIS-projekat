@@ -13,23 +13,28 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.eventmap.presentation.composables.getCurrentLocation
 import com.example.eventmap.presentation.theme.ui.EventMapTheme
 import com.example.eventmap.presentation.utils.BottomNavBar
 import com.example.eventmap.presentation.utils.BottomNavItem
 import com.example.eventmap.presentation.utils.Navigation
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.maps.model.LatLng
 
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<MainActivityViewModel>()
+    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //zbog testiranja
         //val auth = FirebaseAuth.getInstance()
         //auth.signOut()
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         getLocationPermission()
         setContent {
             EventMapTheme {
@@ -95,52 +100,38 @@ class MainActivity : ComponentActivity() {
                             )
                         }) {
                         //navhost
-                        Navigation(navController, viewModel)
+                        Navigation(navController, viewModel, fusedLocationProviderClient)
                     }
                 }
             }
         }
     }
+
     private fun getLocationPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this.applicationContext,
+        //val task = fusedLocationProviderClient.lastLocation
+        if (
+            ActivityCompat.checkSelfPermission(
+                this,
                 Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             viewModel.permissionGrand(true)
-            getDeviceLocation()
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0)
-            }
-        }
-    }
-    private fun getDeviceLocation() {
-        val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        try {
-            if (viewModel.locationPermissionGranted.value == true) {
-                val locationResult = fusedLocationProviderClient.lastLocation
-
-                locationResult.addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val lastKnownLocation = task.result
-
-                        if (lastKnownLocation != null) {
-                            viewModel.currentUserGeoCoord(
-                                LatLng(
-                                    lastKnownLocation.altitude,
-                                    lastKnownLocation.longitude
-                                )
-                            )
-                        }
-                    } else {
-                        Log.d("Exception", " Current User location is null")
-                    }
+            /*task.addOnSuccessListener {
+                if(it!=null){
+                    Log.d("LocDebug", "${it.longitude},${it.latitude}")
                 }
-            }
-        } catch (e: SecurityException) {
-            Log.d("Exception", "Exception:  $e.message.toString()")
+            }*/
+
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                101
+            )
         }
     }
 }
-
