@@ -47,12 +47,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.eventmap.presentation.theme.ui.DarkBlue
 import com.example.eventmap.presentation.utils.rememberMapViewLifecycle
+import com.example.eventmap.presentation.utils.saveUser
+import com.example.eventmap.presentation.utils.updateLocation
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.maps.android.ktx.model.markerOptions
 
 @Composable
-fun MapView(navController: NavController, viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient, context: Context) {
+fun MapView(navController: NavController, viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient) {
     /*Box(modifier = Modifier
         .fillMaxSize()
         .padding(PaddingLarge), contentAlignment = Alignment.Center) {
@@ -67,15 +69,15 @@ fun MapView(navController: NavController, viewModel: MainActivityViewModel, fuse
         MapViewContainer(
             viewModel = viewModel,
             destination = destination,
-            context = context
         )
 
     }
 }
 
 @Composable
-fun MapViewContainer(viewModel: MainActivityViewModel, destination: LatLng, context: Context) {
+fun MapViewContainer(viewModel: MainActivityViewModel, destination: LatLng) {
     val mapView = rememberMapViewLifecycle()
+    val context = LocalContext.current
     //Log.d("MAPDEBUG","MAPVIEWCONTAINER ENTER")
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView({ mapView }) {
@@ -95,10 +97,11 @@ fun MapViewContainer(viewModel: MainActivityViewModel, destination: LatLng, cont
                // Log.d("MAPDEBUG",map.toString())
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(destination, 6f))
                 //Log.d("CurrLoc", "(${viewModel.userCurrentLat.value}, ${viewModel.userCurrentLng.value})")
-                map.addMarker(markerOptions {
+                //trenutna lokacija
+                /*map.addMarker(markerOptions {
                     this.title("Current location")
                     this.position(LatLng(viewModel.userCurrentLat.value,viewModel.userCurrentLng.value))
-                })
+                })*/
                 /*val markerOptions =
                     MarkerOptions().title("Start position").position(viewModel.pickUp)
                 map.addMarker(markerOptions)
@@ -124,6 +127,7 @@ fun MapViewContainer(viewModel: MainActivityViewModel, destination: LatLng, cont
 }
 
 fun getCurrentLocation(viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient) {
+    val auth = FirebaseAuth.getInstance()
     try {
         if (viewModel.locationPermissionGranted.value == true) {
             val task = fusedLocationProviderClient.lastLocation
@@ -132,11 +136,10 @@ fun getCurrentLocation(viewModel: MainActivityViewModel, fusedLocationProviderCl
                 if (it != null) {
                     //Log.d("Location_Result", it.toString())
                     viewModel.currentUserGeoCoord(
-                        LatLng(
-                            it.altitude,
-                            it.longitude
-                        )
+                        LatLng(it.latitude, it.longitude)
                     )
+                    //upisi lokaciju u bazu
+                    updateLocation(auth.currentUser?.uid.toString(),  LatLng(it.latitude, it.longitude))
                 }
             }
         }

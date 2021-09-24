@@ -100,7 +100,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }) {
                         //navhost
-                        Navigation(navController, viewModel, fusedLocationProviderClient, this)
+                        Navigation(navController, viewModel, fusedLocationProviderClient)
                     }
                 }
             }
@@ -125,7 +125,6 @@ class MainActivity : ComponentActivity() {
                     Log.d("LocDebug", "${it.longitude},${it.latitude}")
                 }
             }*/
-
         } else {
             ActivityCompat.requestPermissions(
                 this,

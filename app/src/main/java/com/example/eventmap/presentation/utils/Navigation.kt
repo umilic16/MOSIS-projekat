@@ -19,7 +19,7 @@ import com.example.eventmap.presentation.composables.Home
 import com.google.android.gms.location.FusedLocationProviderClient
 
 @Composable
-fun Navigation(navController: NavController, viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient, context: Context) {
+fun Navigation(navController: NavController, viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient) {
    // val navController = rememberNavController()
     NavHost(navController = navController as NavHostController,
         startDestination = if (checkIfLoggedIn()){
@@ -32,7 +32,7 @@ fun Navigation(navController: NavController, viewModel: MainActivityViewModel, f
             composable(route = "Login", content = { Login(navController = navController) })
             composable(route = "Register", content = { Register(navController = navController) })
             composable(route = "Home", content = { Home(navController = navController) })
-            composable(route = "Map", content = { MapView(navController = navController, viewModel = viewModel, fusedLocationProviderClient = fusedLocationProviderClient, context = context) })
+            composable(route = "Map", content = { MapView(navController = navController, viewModel = viewModel, fusedLocationProviderClient = fusedLocationProviderClient) })
             composable(route = "CreateEvent", content = { CreateEventView(navController = navController) })
             composable(route = "Leaderboard", content = { Leaderboard(navController = navController) })
             composable(route = "Account", content = { AccountView(navController = navController) })
