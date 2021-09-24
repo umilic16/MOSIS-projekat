@@ -177,13 +177,14 @@ fun markEvents(map: GoogleMap, viewModel: MainActivityViewModel){
     FirebaseFirestore.getInstance().collection("Events").get().addOnSuccessListener {
         for(document in it.documents){
             //Log.d("MARKERSDOC", document.toString())
+            var title = document.data?.get("title")
             var desc = document.data?.get("description")
             val location = document.getGeoPoint("location")
             if(location!=null) {
                 //Log.d("MARKERSLOC", location.toString())
                 //Log.d("MARKERSLL", "${email} LOCATION: ${location.latitude}${location.longitude}")
                 map.addMarker(markerOptions {
-                    this.title(desc.toString())
+                    this.title("${title}: ${desc}")
                     this.position(LatLng(location.latitude, location.longitude))
                     this.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                 })
