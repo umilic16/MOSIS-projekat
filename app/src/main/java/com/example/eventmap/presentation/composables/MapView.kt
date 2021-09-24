@@ -1,6 +1,7 @@
 package com.example.eventmap.presentation.composables
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -42,6 +43,7 @@ import java.lang.IllegalStateException
 import androidx.activity.viewModels
 import androidx.compose.material.Surface
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.eventmap.presentation.theme.ui.DarkBlue
 import com.example.eventmap.presentation.utils.rememberMapViewLifecycle
@@ -50,7 +52,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.maps.android.ktx.model.markerOptions
 
 @Composable
-fun MapView(navController: NavController, viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient) {
+fun MapView(navController: NavController, viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient, context: Context) {
     /*Box(modifier = Modifier
         .fillMaxSize()
         .padding(PaddingLarge), contentAlignment = Alignment.Center) {
@@ -64,20 +66,32 @@ fun MapView(navController: NavController, viewModel: MainActivityViewModel, fuse
     Surface(color = DarkBlue) {
         MapViewContainer(
             viewModel = viewModel,
-            destination = destination
+            destination = destination,
+            context = context
         )
 
     }
 }
 
 @Composable
-fun MapViewContainer(viewModel: MainActivityViewModel, destination: LatLng) {
+fun MapViewContainer(viewModel: MainActivityViewModel, destination: LatLng, context: Context) {
     val mapView = rememberMapViewLifecycle()
     //Log.d("MAPDEBUG","MAPVIEWCONTAINER ENTER")
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView({ mapView }) {
             CoroutineScope(Dispatchers.Main).launch {
                 val map = mapView.awaitMap()
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                }
+                map.isMyLocationEnabled = true
+                //Log.d("LOC_DEBUG", map.myLocation.toString())
                // Log.d("MAPDEBUG",map.toString())
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(destination, 6f))
                 //Log.d("CurrLoc", "(${viewModel.userCurrentLat.value}, ${viewModel.userCurrentLng.value})")
@@ -113,9 +127,10 @@ fun getCurrentLocation(viewModel: MainActivityViewModel, fusedLocationProviderCl
     try {
         if (viewModel.locationPermissionGranted.value == true) {
             val task = fusedLocationProviderClient.lastLocation
-            Log.d("LocDebug", task.toString())
+            Log.d("Location_Result", task.toString())
             task.addOnSuccessListener {
                 if (it != null) {
+                    //Log.d("Location_Result", it.toString())
                     viewModel.currentUserGeoCoord(
                         LatLng(
                             it.altitude,

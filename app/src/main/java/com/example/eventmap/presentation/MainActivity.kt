@@ -100,7 +100,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }) {
                         //navhost
-                        Navigation(navController, viewModel, fusedLocationProviderClient)
+                        Navigation(navController, viewModel, fusedLocationProviderClient, this)
                     }
                 }
             }
