@@ -43,10 +43,10 @@ fun AccountView(navController: NavController) {
     val numOfFriends = remember { mutableStateOf("") }
     val numOfEvents = remember { mutableStateOf("") }
     val points = remember { mutableStateOf("") }
-    //val user = FirebaseFirestore.getInstance().collection("users-test2").document(auth.currentUser?.uid.toString()).get()
+    //val user = FirebaseFirestore.getInstance().collection("Users").document(auth.currentUser?.uid.toString()).get()
     //Log.d("ALOOOOO", "EJ")
     val db = FirebaseFirestore.getInstance()
-    val docRef = db.collection("users-test2").document(auth.currentUser?.uid.toString())
+    val docRef = db.collection("Users").document(auth.currentUser?.uid.toString())
     docRef.get().addOnSuccessListener { documentSnapshot ->
         username.value = documentSnapshot.data?.get("username").toString()
         email.value = documentSnapshot.data?.get("email").toString()

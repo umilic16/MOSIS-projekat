@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">EventMap</string>
-    <string name="db_name">users-test2</string>
+    <string name="db_name">Users</string>
     <string name="google_maps_key">AIzaSyDa39CkKykhXfwRfcxwvEKELBpf0VvkeFc</string>
 </resources>

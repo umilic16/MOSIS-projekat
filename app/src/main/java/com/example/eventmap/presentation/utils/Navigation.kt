@@ -33,7 +33,7 @@ fun Navigation(navController: NavController, viewModel: MainActivityViewModel, f
             composable(route = "Register", content = { Register(navController = navController) })
             composable(route = "Home", content = { Home(navController = navController) })
             composable(route = "Map", content = { MapView(navController = navController, viewModel = viewModel, fusedLocationProviderClient = fusedLocationProviderClient) })
-            composable(route = "CreateEvent", content = { CreateEventView(navController = navController) })
+            composable(route = "CreateEvent", content = { CreateEventView(navController = navController, viewModel = viewModel) })
             composable(route = "Leaderboard", content = { Leaderboard(navController = navController) })
             composable(route = "Account", content = { AccountView(navController = navController) })
         })

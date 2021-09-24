@@ -17,14 +17,17 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.eventmap.data.User
 import com.example.eventmap.presentation.composables.getCurrentLocation
 import com.example.eventmap.presentation.theme.ui.EventMapTheme
 import com.example.eventmap.presentation.utils.BottomNavBar
 import com.example.eventmap.presentation.utils.BottomNavItem
 import com.example.eventmap.presentation.utils.Navigation
+import com.example.eventmap.presentation.utils.saveUser
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.maps.model.LatLng
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<MainActivityViewModel>()

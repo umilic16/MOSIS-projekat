@@ -3,6 +3,7 @@ package com.example.eventmap.presentation.composables
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -31,9 +32,6 @@ import com.example.eventmap.presentation.theme.ui.DefaultBlue
 import com.example.eventmap.presentation.theme.ui.PaddingLarge
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.MapView
-import com.google.android.libraries.maps.model.LatLng
-import com.google.android.libraries.maps.model.MarkerOptions
-import com.google.android.libraries.maps.model.PolylineOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.maps.android.ktx.awaitMap
 import kotlinx.coroutines.CoroutineScope
@@ -45,12 +43,18 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.DarkBlue
 import com.example.eventmap.presentation.utils.rememberMapViewLifecycle
 import com.example.eventmap.presentation.utils.saveUser
 import com.example.eventmap.presentation.utils.updateLocation
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.libraries.maps.GoogleMap
+import com.google.android.libraries.maps.model.*
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.ktx.toObject
 import com.google.maps.android.ktx.model.markerOptions
 
 @Composable
@@ -93,6 +97,8 @@ fun MapViewContainer(viewModel: MainActivityViewModel, destination: LatLng) {
                 ) {
                 }
                 map.isMyLocationEnabled = true
+                markUsers(map, viewModel)
+                markEvents(map,viewModel)
                 //Log.d("LOC_DEBUG", map.myLocation.toString())
                // Log.d("MAPDEBUG",map.toString())
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(destination, 6f))
@@ -139,12 +145,49 @@ fun getCurrentLocation(viewModel: MainActivityViewModel, fusedLocationProviderCl
                         LatLng(it.latitude, it.longitude)
                     )
                     //upisi lokaciju u bazu
-                    updateLocation(auth.currentUser?.uid.toString(),  LatLng(it.latitude, it.longitude))
+                    updateLocation(auth.currentUser?.uid.toString(),  GeoPoint(it.latitude, it.longitude))
                 }
             }
         }
     } catch (e: SecurityException) {
         Log.d("Exception", "Exception:  $e.message.toString()")
 
+    }
+}
+
+fun markUsers(map: GoogleMap, viewModel: MainActivityViewModel){
+    FirebaseFirestore.getInstance().collection("Users").get().addOnSuccessListener {
+        for(document in it.documents){
+           // Log.d("MARKERSDOC", document.toString())
+            val email = document.data?.get("email")
+            val location = document.getGeoPoint("location")
+            if(location!=null) {
+                //Log.d("MARKERSLOC", location.toString())
+                //Log.d("MARKERSLL", "${email} LOCATION: ${location.latitude}${location.longitude}")
+                map.addMarker(markerOptions {
+                    this.title("User: ${email}")
+                    this.position(LatLng(location.latitude, location.longitude))
+                })
+            }
+        }
+    }
+}
+
+fun markEvents(map: GoogleMap, viewModel: MainActivityViewModel){
+    FirebaseFirestore.getInstance().collection("Events").get().addOnSuccessListener {
+        for(document in it.documents){
+            //Log.d("MARKERSDOC", document.toString())
+            var desc = document.data?.get("description")
+            val location = document.getGeoPoint("location")
+            if(location!=null) {
+                //Log.d("MARKERSLOC", location.toString())
+                //Log.d("MARKERSLL", "${email} LOCATION: ${location.latitude}${location.longitude}")
+                map.addMarker(markerOptions {
+                    this.title(desc.toString())
+                    this.position(LatLng(location.latitude, location.longitude))
+                    this.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                })
+            }
+        }
     }
 }
