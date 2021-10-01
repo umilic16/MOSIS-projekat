@@ -9,8 +9,3 @@ val LightGray = Color(0xFFD3D9DF)
 val ButtonGray = Color(0xFFa1a1a1)
 val HintGray = Color(0xFF575757)
 val DarkText = Color(0xFF000f1f)
-
-val Purple200 = Color(0xFFBB86FC)
-val Purple500 = Color(0xFF6200EE)
-val Purple700 = Color(0xFF3700B3)
-val Teal200 = Color(0xFF03DAC5)

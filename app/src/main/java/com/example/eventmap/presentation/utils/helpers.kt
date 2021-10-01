@@ -1,44 +1,49 @@
 package com.example.eventmap.presentation.utils
 
-import android.location.Location
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
 import com.example.eventmap.data.Event
 import com.example.eventmap.data.User
-import com.google.android.libraries.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ktx.toObject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
-import java.lang.Exception
 
 fun checkIfLoggedIn(): Boolean {
     val auth = FirebaseAuth.getInstance()
     return auth.currentUser==null
 }
 
-//suspend
-fun saveUser(uid: String, user: User){
-    FirebaseFirestore.getInstance().collection("Users").document(uid).set(user)
-}
-/*fun saveUser(user: User) = CoroutineScope(Dispatchers.IO).launch {
-    val dbRefUsers = FirebaseFirestore.getInstance().collection("users-test");
-    try{
-        dbRefUsers.add(user).await()
-    }catch (e:Exception) {
-        Log.d("SAVEUSER", e.message.toString())
+
+fun getCurrentUser(): User?{
+    val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
+    val docRef = db.collection("users_db").document(auth.currentUser!!.uid)
+    var user: User? = null
+    docRef.get().addOnSuccessListener {
+        user = it.toObject<User>()
     }
-}*/
+    Log.d("User_log", "User returning: ${user}")
+    return user
+}
+
+fun saveUser(user: User){
+    val auth = FirebaseAuth.getInstance()
+    FirebaseFirestore.getInstance().collection("users_db").document(auth.currentUser!!.uid).set(user)
+}
+
+fun updateUsername(username: String){
+    val auth = FirebaseAuth.getInstance()
+    FirebaseFirestore.getInstance().collection("users_db").document(auth.currentUser!!.uid).update("username", username)
+}
+
 fun updateLocation(uid: String, location: GeoPoint){
-    FirebaseFirestore.getInstance().collection("Users").document(uid).update("location", location)
+    val auth = FirebaseAuth.getInstance()
+    FirebaseFirestore.getInstance().collection("users_db").document(auth.currentUser!!.uid).update("location", location)
 }
 
 fun saveEvent(event: Event){
-    FirebaseFirestore.getInstance().collection("Events").add(event)
+    val auth = FirebaseAuth.getInstance()
+    FirebaseFirestore.getInstance().collection("events_db").add(event)
+    FirebaseFirestore.getInstance().collection("users_db").document(auth.currentUser!!.uid).update("numOfEvents", FieldValue.increment(1))
 }

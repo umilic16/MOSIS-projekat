@@ -14,19 +14,15 @@ import com.google.android.libraries.maps.MapView
 @Composable
 fun rememberMapViewLifecycle(): MapView{
     val context = LocalContext.current
-
     val mapView = remember {
         MapView(context).apply { id = R.id.map }
     }
-
     val lifeCycleObserver = rememberMapLifecycleObserver(mapView)
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-
     DisposableEffect(lifecycle){
         lifecycle.addObserver(lifeCycleObserver)
         onDispose { lifecycle.removeObserver(lifeCycleObserver) }
     }
-
     return  mapView
 }
 

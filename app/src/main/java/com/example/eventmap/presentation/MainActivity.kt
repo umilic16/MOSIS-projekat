@@ -1,33 +1,27 @@
 package com.example.eventmap.presentation
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.eventmap.data.User
-import com.example.eventmap.presentation.composables.getCurrentLocation
 import com.example.eventmap.presentation.theme.ui.EventMapTheme
 import com.example.eventmap.presentation.utils.BottomNavBar
 import com.example.eventmap.presentation.utils.BottomNavItem
 import com.example.eventmap.presentation.utils.Navigation
-import com.example.eventmap.presentation.utils.saveUser
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.libraries.maps.model.LatLng
-import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<MainActivityViewModel>()
@@ -49,18 +43,6 @@ class MainActivity : ComponentActivity() {
                     val backStateEntry by navController.currentBackStackEntryAsState()
                     val currentRoute = backStateEntry?.destination?.route
                     Scaffold(
-                        /*topBar={
-                            TopAppBar(
-                                backgroundColor = DefaultBlue,
-                                contentColor = DefaultWhite,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight(fraction = 0.1f),
-                                contentPadding = PaddingValues(1.dp)
-                            ) {
-                                Text(text = "EventMap", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                            }
-                        },*/
                         //kreiraj bottom bar
                         bottomBar = {
                             BottomNavBar(
@@ -111,7 +93,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun getLocationPermission() {
-        //val task = fusedLocationProviderClient.lastLocation
         if (
             ActivityCompat.checkSelfPermission(
                 this,
@@ -123,11 +104,6 @@ class MainActivity : ComponentActivity() {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             viewModel.permissionGrand(true)
-            /*task.addOnSuccessListener {
-                if(it!=null){
-                    Log.d("LocDebug", "${it.longitude},${it.latitude}")
-                }
-            }*/
         } else {
             ActivityCompat.requestPermissions(
                 this,

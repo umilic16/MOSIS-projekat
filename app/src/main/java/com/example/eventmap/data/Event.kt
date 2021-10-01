@@ -7,6 +7,7 @@ import com.google.firebase.firestore.GeoPoint
 data class Event(
     val userId: String,
     val title: String,
-    val description:String,
+    val description: String? = "",
     val location: GeoPoint = GeoPoint(0.0,0.0)
+//slika mozda
 )

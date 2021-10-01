@@ -1,6 +1,6 @@
 package com.example.eventmap.presentation.composables
 
-import android.util.Log
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,31 +13,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.data.Event
-import com.example.eventmap.data.User
 import com.example.eventmap.presentation.MainActivityViewModel
 import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.utils.saveEvent
-import com.example.eventmap.presentation.utils.saveUser
-import com.google.android.libraries.maps.model.LatLng
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.GeoPoint
 
+@SuppressLint("MissingPermission")
 @Composable
-fun CreateEventView(navController: NavController, viewModel: MainActivityViewModel) {
+fun CreateEventView(navController: NavController, viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient) {
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
     val title = remember { mutableStateOf("") }
     val desc = remember { mutableStateOf("") }
     val lat = remember { mutableStateOf("") }
-    val lng = remember { mutableStateOf("")}
+    val lng = remember { mutableStateOf("") }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -51,7 +48,8 @@ fun CreateEventView(navController: NavController, viewModel: MainActivityViewMod
             text = "Create an event",
             color = DefaultWhite,
             fontSize = 22.sp,
-            modifier = Modifier.fillMaxWidth())
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.padding(PaddingMedium))
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -89,9 +87,12 @@ fun CreateEventView(navController: NavController, viewModel: MainActivityViewMod
                     text = "Use current location",
                     color = DefaultWhite,
                     modifier = Modifier.clickable(onClick = {
-                        lng.value=viewModel.userCurrentLng.value.toString()
-                        lat.value=viewModel.userCurrentLat.value.toString()
-                    }))
+                        fusedLocationProviderClient.lastLocation.addOnSuccessListener {
+                            lat.value = it.latitude.toString()
+                            lng.value = it.longitude.toString()
+                        }
+                    })
+                )
                 Spacer(modifier = Modifier.padding(PaddingLarge))
                 Button(
                     onClick = {
@@ -103,12 +104,11 @@ fun CreateEventView(navController: NavController, viewModel: MainActivityViewMod
                             ).show()
                         } else {
                             val event = Event(
-                                userId=auth.currentUser?.uid.toString(),
-                                title=title.value,
+                                userId = auth.currentUser?.uid.toString(),
+                                title = title.value,
                                 description = desc.value,
-                                location = GeoPoint(lat.value.toDouble(),lng.value.toDouble())
+                                location = GeoPoint(lat.value.toDouble(), lng.value.toDouble())
                             )
-                            //Log.d("Event_Debgu", event.toString())
                             saveEvent(event)
                             Toast.makeText(
                                 context,

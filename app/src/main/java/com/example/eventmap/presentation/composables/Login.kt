@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -11,15 +12,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventmap.R
-import androidx.compose.ui.unit.sp
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.presentation.theme.ui.*
 import com.google.firebase.auth.FirebaseAuth
@@ -28,6 +29,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun Login(navController: NavController) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
+    val showPassword = remember { mutableStateOf(false) }
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
     //ceo container
@@ -76,7 +78,10 @@ fun Login(navController: NavController) {
                     onValueChange = { password.value = it },
                     hint = "Password",
                     keyboardType = KeyboardType.Password,
-                    visualTransformation = PasswordVisualTransformation()
+                    isPasswordVisible = showPassword.value,
+                    onPasswordToggleClick = {
+                        showPassword.value = !showPassword.value
+                    }
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //forgot password
@@ -98,16 +103,16 @@ fun Login(navController: NavController) {
                             ).show()
                         } else {
                             auth.signInWithEmailAndPassword(email.value, password.value)
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        navController.navigate("Home")
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Incorrect username or password!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                .addOnSuccessListener {
+                                    navController.navigate("Home")
+                                }
+                                .addOnFailureListener {
+                                    //Log.d("Login_Exception", it.toString())
+                                    Toast.makeText(
+                                        context,
+                                        "Email or password are not correct",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                         }
                     },
@@ -124,14 +129,17 @@ fun Login(navController: NavController) {
     }
     //Create account
     Box(
-        modifier = Modifier.fillMaxSize().padding(horizontal = PaddingMedium, vertical = PaddingLarge),
-        contentAlignment = Alignment.BottomStart){
+        modifier = Modifier.fillMaxSize()
+            .padding(horizontal = PaddingMedium, vertical = PaddingLarge),
+        contentAlignment = Alignment.BottomStart
+    ) {
         Text(
             text = "Create an account?",
             color = DefaultWhite,
             modifier = Modifier.clickable(onClick = {
                 navController.navigate("Register") {
                 }
-            }))
+            })
+        )
     }
 }

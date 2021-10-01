@@ -1,14 +1,20 @@
 package com.example.eventmap.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,34 +27,66 @@ import com.example.eventmap.presentation.theme.ui.HintGray
 fun CustomTextField(
     text: String = "",
     hint: String = "",
-    onValueChange: (String) -> Unit,
+    onValueChange: (String) -> Unit = {},
     isError: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
-    visualTransformation: VisualTransformation = VisualTransformation.None,
     colors: TextFieldColors = TextFieldDefaults.textFieldColors(
         textColor = DarkText,
         backgroundColor = DefaultWhite,
+        placeholderColor = HintGray
     ),
     modifier: Modifier = Modifier,
-    readOnly: Boolean = false
+    readOnly: Boolean = false,
+    style:TextStyle = TextStyle(
+        fontWeight = FontWeight.W500,
+        fontSize = 16.sp
+    ),
+    isPasswordVisible: Boolean = false,
+    onPasswordToggleClick: (Boolean) -> Unit = {},
+    showIcon: Boolean =  keyboardType == KeyboardType.Password
 ) {
     TextField(
         value = text,
         onValueChange = onValueChange,
-        textStyle = TextStyle(//color = DefaultWhite,
-            fontWeight = FontWeight.Bold, fontSize = 16.sp
-        ),
+        textStyle = style,
         placeholder = {
-            Text(text = hint, color = HintGray)
+            Text(text = hint)
         },
         isError = isError,
         keyboardOptions = KeyboardOptions(
             keyboardType = keyboardType
         ),
+        visualTransformation = if (!isPasswordVisible && keyboardType == KeyboardType.Password) {
+            PasswordVisualTransformation()
+        } else {
+            VisualTransformation.None
+        },
+        trailingIcon = if (showIcon) {
+            val icon: @Composable () -> Unit = {
+                IconButton(
+                    onClick = {
+                        onPasswordToggleClick(!isPasswordVisible)
+                    },
+                ) {
+                    Icon(
+                        imageVector = if (isPasswordVisible) {
+                            Icons.Filled.VisibilityOff
+                        } else {
+                            Icons.Filled.Visibility
+                        },
+                        tint = HintGray,
+                        contentDescription = null
+                    )
+                }
+            }
+            icon
+        } else null,
         singleLine = true,
-        modifier = Modifier.fillMaxWidth().shadow(elevation = 5.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(elevation = 5.dp)
+            .clip(RoundedCornerShape(5.dp)),
         colors = colors,
-        visualTransformation = visualTransformation,
-        readOnly = readOnly
+        readOnly = readOnly,
     )
 }

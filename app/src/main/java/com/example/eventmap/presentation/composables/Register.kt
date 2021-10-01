@@ -1,6 +1,5 @@
 package com.example.eventmap.presentation.composables
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,10 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.*
@@ -28,9 +26,9 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun Register(navController: NavController) {
     val email = remember { mutableStateOf("") }
-    //val username = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
-    val repeatedPassword = remember { mutableStateOf("")}
+    val repeatedPassword = remember { mutableStateOf("") }
+    val showPassword = remember { mutableStateOf(false) }
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
     //ceo container
@@ -40,7 +38,6 @@ fun Register(navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            //.background(DarkBlue)
             .padding(PaddingMedium)
     ) {
         Spacer(modifier = Modifier.padding(PaddingExtra))
@@ -48,13 +45,12 @@ fun Register(navController: NavController) {
             text = "Create your account",
             color = DefaultWhite,
             fontSize = 20.sp,
-            modifier = Modifier.fillMaxWidth())
+            modifier = Modifier.fillMaxWidth()
+        )
         //input boxes i forgot pass
         Spacer(modifier = Modifier.padding(PaddingMedium))
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            //zbog testiranja
-            //modifier = Modifier.background(LightGray)
         )
         {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -63,7 +59,7 @@ fun Register(navController: NavController) {
                     text = email.value,
                     onValueChange = { email.value = it },
                     hint = "Email address",
-                    keyboardType = KeyboardType.Email
+                    keyboardType = KeyboardType.Email,
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //password
@@ -72,7 +68,8 @@ fun Register(navController: NavController) {
                     onValueChange = { password.value = it },
                     hint = "Password",
                     keyboardType = KeyboardType.Password,
-                    visualTransformation = PasswordVisualTransformation()
+                    isPasswordVisible = showPassword.value,
+                    showIcon = false
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //repeat password
@@ -81,8 +78,24 @@ fun Register(navController: NavController) {
                     onValueChange = { repeatedPassword.value = it },
                     hint = "Repeat password",
                     keyboardType = KeyboardType.Password,
-                    visualTransformation = PasswordVisualTransformation()
+                    isPasswordVisible = showPassword.value,
+                    showIcon = false
                 )
+                Spacer(modifier = Modifier.padding(PaddingSmall))
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text =
+                        if (showPassword.value) {
+                            "Hide password"
+                        } else {
+                            "Show password"
+                        },
+                        color = DefaultWhite,
+                        modifier = Modifier.clickable(onClick = {
+                            showPassword.value = !showPassword.value
+                        })
+                    )
+                }
                 Spacer(modifier = Modifier.padding(PaddingLarge))
                 Button(
                     onClick = {
@@ -100,21 +113,19 @@ fun Register(navController: NavController) {
                             ).show()
                         } else {
                             auth.createUserWithEmailAndPassword(email.value, password.value)
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        saveUser(
-                                            //uid usera je uid dokumenta u kolekciji users
-                                            auth.currentUser?.uid.toString(),
-                                            User(email.value, password = password.value)
-                                        )
-                                        navController.navigate("Home")
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Authentication error",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                .addOnSuccessListener {
+                                    saveUser(
+                                        User(email.value, password = password.value)
+                                    )
+                                    navController.navigate("Home")
+                                }
+                                .addOnFailureListener {
+                                    //Log.d("Register_Exception", it.toString())
+                                    Toast.makeText(
+                                        context,
+                                        "Authentication error\n${it.localizedMessage}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                         }
                     },
@@ -129,18 +140,20 @@ fun Register(navController: NavController) {
         }
         Spacer(modifier = Modifier.padding(PaddingExtra))
     }
-    //Sing in
+    //Sign in
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = PaddingMedium, vertical = PaddingLarge),
-        contentAlignment = Alignment.BottomStart){
+        contentAlignment = Alignment.BottomStart
+    ) {
         Text(
             text = "Already have an account?",
             color = DefaultWhite,
             modifier = Modifier.clickable(onClick = {
                 navController.navigate("Login") {
                 }
-            }))
+            })
+        )
     }
 }
