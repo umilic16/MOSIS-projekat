@@ -1,4 +1,4 @@
-package com.example.eventmap.presentation
+package com.example.eventmap.presentation.viewmodels
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf

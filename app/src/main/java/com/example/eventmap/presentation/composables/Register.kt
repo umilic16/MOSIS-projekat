@@ -19,7 +19,7 @@ import androidx.navigation.NavController
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.*
-import com.example.eventmap.presentation.utils.saveUser
+import com.example.eventmap.utils.saveUser
 import com.google.firebase.auth.FirebaseAuth
 
 

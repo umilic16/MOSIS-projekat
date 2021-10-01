@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
@@ -13,19 +12,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventmap.components.CustomTextField
-import com.example.eventmap.presentation.MainActivityViewModel
+import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.theme.ui.*
-import com.example.eventmap.presentation.utils.updateUsername
+import com.example.eventmap.utils.updateUsername
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -43,55 +40,50 @@ fun AccountView(navController: NavController, viewModel: MainActivityViewModel) 
             .padding(PaddingMedium)
     ) {
         Spacer(modifier = Modifier.padding(PaddingExtra))
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Text(
+            text = "Account Information",
+            color = DefaultWhite,
+            fontSize = 20.sp,
+            modifier = Modifier.fillMaxWidth()
         )
-        {
-            Text(
-                text = "Account Information",
-                color = DefaultWhite,
-                fontSize = 20.sp,
-                modifier = Modifier.fillMaxWidth()
+        Spacer(modifier = Modifier.padding(PaddingMedium))
+        CustomTextField(
+            text = username.value,
+            onValueChange = { username.value = it },
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = DarkText,
+                backgroundColor = DefaultWhite,
+                placeholderColor = DarkText
+            ),
+            hint = if (user.username!!.isNotEmpty()) user.username else "Enter your username",
+        )
+        Spacer(modifier = Modifier.padding(PaddingSmall))
+        CustomTextField(
+            text = user.email,
+            readOnly = true,
+            style = TextStyle(
+                fontWeight = FontWeight.W400,
+                fontSize = 16.sp
             )
-            Spacer(modifier = Modifier.padding(PaddingMedium))
-            CustomTextField(
-                text = username.value,
-                onValueChange = { username.value = it },
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = DarkText,
-                    backgroundColor = DefaultWhite,
-                    placeholderColor = DarkText
-                ),
-                hint = if (user.username!!.isNotEmpty()) user.username else "Enter your username",
+        )
+        Spacer(modifier = Modifier.padding(PaddingSmall))
+        CustomTextField(
+            text = "Friends: ${user.numOfFriends}",
+            readOnly = true,
+            style = TextStyle(
+                fontWeight = FontWeight.W400,
+                fontSize = 16.sp
             )
-            Spacer(modifier = Modifier.padding(PaddingSmall))
-            CustomTextField(
-                text = user.email,
-                readOnly = true,
-                style = TextStyle(
-                    fontWeight = FontWeight.W400,
-                    fontSize = 16.sp
-                )
+        )
+        Spacer(modifier = Modifier.padding(PaddingSmall))
+        CustomTextField(
+            text = "Events: ${user.numOfEvents}",
+            readOnly = true,
+            style = TextStyle(
+                fontWeight = FontWeight.W400,
+                fontSize = 16.sp
             )
-            Spacer(modifier = Modifier.padding(PaddingSmall))
-            CustomTextField(
-                text = "Friends: ${user.numOfFriends}",
-                readOnly = true,
-                style = TextStyle(
-                    fontWeight = FontWeight.W400,
-                    fontSize = 16.sp
-                )
-            )
-            Spacer(modifier = Modifier.padding(PaddingSmall))
-            CustomTextField(
-                text = "Events: ${user.numOfEvents}",
-                readOnly = true,
-                style = TextStyle(
-                    fontWeight = FontWeight.W400,
-                    fontSize = 16.sp
-                )
-            )
-        }
+        )
         Spacer(modifier = Modifier.padding(PaddingSmall))
         CustomTextField(
             text = "Points: ${user.points}",

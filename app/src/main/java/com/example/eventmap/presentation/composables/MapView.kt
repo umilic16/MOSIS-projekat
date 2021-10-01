@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import com.example.eventmap.presentation.MainActivityViewModel
+import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.utils.rememberMapViewLifecycle
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.maps.CameraUpdateFactory
@@ -38,7 +38,6 @@ fun MapView(navController: NavController, viewModel: MainActivityViewModel, fuse
                 //markUsers(map, viewModel)
                 //markEvents(map,viewModel)
                 //
-                //Log.d("CurrLoc", "(${viewModel.userCurrentLat.value}, ${viewModel.userCurrentLng.value})")
             }
         }
     }
@@ -89,9 +88,8 @@ fun MapView(navController: NavController, viewModel: MainActivityViewModel, fuse
 fun markEvents(map: GoogleMap, viewModel: MainActivityViewModel){
     FirebaseFirestore.getInstance().collection("Events").get().addOnSuccessListener {
         for(document in it.documents){
-            //Log.d("MARKERSDOC", document.toString())
-            var title = document.data?.get("title")
-            var desc = document.data?.get("description")
+            val title = document.data?.get("title")
+            val desc = document.data?.get("description")
             val location = document.getGeoPoint("location")
             if(location!=null) {
                 map.addMarker(markerOptions {

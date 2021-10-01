@@ -11,23 +11,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.eventmap.data.User
-import com.example.eventmap.presentation.MainActivityViewModel
 import com.example.eventmap.presentation.theme.ui.DefaultBlue
 import com.example.eventmap.presentation.theme.ui.PaddingLarge
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
 
 @Composable
-fun Home(navController: NavController, viewModel: MainActivityViewModel) {
-    val auth = FirebaseAuth.getInstance()
+fun Home(navController: NavController) {
     val context = LocalContext.current
-    val db = FirebaseFirestore.getInstance()
-    val docRef = db.collection("users_db").document(auth.currentUser?.uid.toString())
-    docRef.get().addOnSuccessListener {
-        viewModel.setCurrentUser(it.toObject<User>()!!)
-    }
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(PaddingLarge), contentAlignment = Alignment.Center) {

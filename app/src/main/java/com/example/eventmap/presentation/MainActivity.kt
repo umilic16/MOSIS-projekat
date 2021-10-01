@@ -16,15 +16,23 @@ import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.EventMapTheme
 import com.example.eventmap.presentation.utils.BottomNavBar
 import com.example.eventmap.presentation.utils.BottomNavItem
 import com.example.eventmap.presentation.utils.Navigation
+import com.example.eventmap.presentation.viewmodels.UsersViewModel
+import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
+import com.example.eventmap.utils.addRandomUsers
+import com.example.eventmap.utils.getRandomString
+import com.example.eventmap.utils.saveUser
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<MainActivityViewModel>()
+    private val usersViewModel by viewModels<UsersViewModel>()
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +41,7 @@ class MainActivity : ComponentActivity() {
         //auth.signOut()
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         getLocationPermission()
+        //addRandomUsers(3,6)
         setContent {
             EventMapTheme {
                 Surface(
@@ -62,7 +71,7 @@ class MainActivity : ComponentActivity() {
                                     BottomNavItem(
                                         name = "New Event",
                                         route = "CreateEvent",
-                                        icon = Icons.Default.PostAdd
+                                        icon = Icons.Default.AddBox
                                     ),
                                     BottomNavItem(
                                         name = "Leaderboard",
@@ -85,7 +94,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }) {
                         //navhost
-                        Navigation(navController, viewModel, fusedLocationProviderClient)
+                        Navigation(navController, viewModel, fusedLocationProviderClient, usersViewModel)
                     }
                 }
             }

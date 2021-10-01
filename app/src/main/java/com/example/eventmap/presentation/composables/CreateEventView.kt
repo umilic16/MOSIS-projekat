@@ -19,16 +19,15 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.data.Event
-import com.example.eventmap.presentation.MainActivityViewModel
 import com.example.eventmap.presentation.theme.ui.*
-import com.example.eventmap.presentation.utils.saveEvent
+import com.example.eventmap.utils.saveEvent
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.GeoPoint
 
 @SuppressLint("MissingPermission")
 @Composable
-fun CreateEventView(navController: NavController, viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient) {
+fun CreateEventView(navController: NavController, fusedLocationProviderClient: FusedLocationProviderClient) {
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
     val title = remember { mutableStateOf("") }
