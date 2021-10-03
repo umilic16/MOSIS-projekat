@@ -1,5 +1,8 @@
 package com.example.eventmap.presentation.composables
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,24 +16,36 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.eventmap.R
 import com.example.eventmap.components.CustomTextField
+import com.example.eventmap.components.ImageHolder
 import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.theme.ui.*
+import com.example.eventmap.utils.Constants
+import com.example.eventmap.utils.Constants.MAX_DOWNLOAD_SIZE
 import com.example.eventmap.utils.updateUsername
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun AccountView(navController: NavController, viewModel: MainActivityViewModel) {
     val auth = FirebaseAuth.getInstance()
     val username = remember { mutableStateOf("") }
-    val user = viewModel.currentUser.value
     val context = LocalContext.current
+    val user = viewModel.currentUser.value
+    val picture = viewModel.picture
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
@@ -39,13 +54,20 @@ fun AccountView(navController: NavController, viewModel: MainActivityViewModel) 
             .fillMaxHeight()
             .padding(PaddingMedium)
     ) {
-        Spacer(modifier = Modifier.padding(PaddingExtra))
         Text(
             text = "Account Information",
             color = DefaultWhite,
             fontSize = 20.sp,
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.padding(PaddingLarge))
+        picture.value?.let{
+            ImageHolder(
+                bitmap = it.asImageBitmap(),
+                modifier = Modifier
+                    .size(150.dp)
+            )
+        }
         Spacer(modifier = Modifier.padding(PaddingMedium))
         CustomTextField(
             text = username.value,
@@ -151,9 +173,20 @@ fun AccountView(navController: NavController, viewModel: MainActivityViewModel) 
             color = DefaultWhite,
             modifier = Modifier.clickable(onClick = {
                 auth.signOut()
-                navController.navigate("Login") {
-                }
+                navController.popBackStack("Home", true)
+                navController.navigate("Login")
             })
         )
     }
 }
+
+/*fun downloadImage(name: String) = CoroutineScope(Dispatchers.IO).launch{
+    try {
+        val auth = FirebaseAuth.getInstance()
+        val image = Firebase.storage.reference
+            .child("images/${auth.currentUser?.uid}").getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
+        val bmp = BitmapFactory.decodeByteArray(image, 0, image.size)
+    } catch (e: Exception) {
+        Log.d("Download_Exception", e.message.toString())
+    }
+}*/

@@ -2,8 +2,10 @@ package com.example.eventmap.presentation
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
@@ -16,19 +18,18 @@ import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.EventMapTheme
-import com.example.eventmap.presentation.utils.BottomNavBar
-import com.example.eventmap.presentation.utils.BottomNavItem
+import com.example.eventmap.components.BottomNavBar
+import com.example.eventmap.components.BottomNavItem
 import com.example.eventmap.presentation.utils.Navigation
-import com.example.eventmap.presentation.viewmodels.UsersViewModel
+import com.example.eventmap.presentation.utils.addUsersListener
 import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
-import com.example.eventmap.utils.addRandomUsers
-import com.example.eventmap.utils.getRandomString
-import com.example.eventmap.utils.saveUser
+import com.example.eventmap.presentation.viewmodels.UsersViewModel
+import com.example.eventmap.utils.checkIfLoggedIn
+import com.example.eventmap.utils.setCurrentPicture
+import com.example.eventmap.utils.setCurrentUser
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<MainActivityViewModel>()
@@ -39,8 +40,14 @@ class MainActivity : ComponentActivity() {
         //zbog testiranja
         //val auth = FirebaseAuth.getInstance()
         //auth.signOut()
+        //fused api za lokaciju
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         getLocationPermission()
+        if(checkIfLoggedIn()){
+            setCurrentUser(viewModel = viewModel)
+            setCurrentPicture(viewModel = viewModel)
+        }
+        addUsersListener(usersViewModel = usersViewModel)
         //addRandomUsers(3,6)
         setContent {
             EventMapTheme {

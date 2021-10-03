@@ -1,5 +1,7 @@
 package com.example.eventmap.utils
 
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
 import com.example.eventmap.data.Event
 import com.example.eventmap.data.User
@@ -11,6 +13,8 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,26 +22,16 @@ import kotlinx.coroutines.tasks.await
 
 fun checkIfLoggedIn(): Boolean {
     val auth = FirebaseAuth.getInstance()
-    return auth.currentUser==null
+    return auth.currentUser!=null
 }
 
-fun getCurrentUser(): User?{
-    val auth = FirebaseAuth.getInstance()
-    val db = FirebaseFirestore.getInstance()
-    val docRef = db.collection(USERS_DB).document(auth.currentUser!!.uid)
-    var user: User? = null
-    docRef.get().addOnSuccessListener {
-        user = it.toObject<User>()
-    }
-    //Log.d("User_log", "User returning: $user")
-    return user
-}
-
-fun saveUser(user: User) = CoroutineScope(Dispatchers.IO).launch{
+fun saveUser(user: User, picture: Uri) = CoroutineScope(Dispatchers.IO).launch{
     try {
         val auth = FirebaseAuth.getInstance()
-        FirebaseFirestore.getInstance().collection(USERS_DB).document(auth.currentUser!!.uid)
+        val userId = auth.currentUser!!.uid
+        FirebaseFirestore.getInstance().collection(USERS_DB).document(userId)
             .set(user).await()
+        Firebase.storage.reference.child("images/${userId}").putFile(picture).await()
     }catch (e: Exception){
         Log.d("SaveUser_Exception", e.message.toString())
     }
@@ -76,24 +70,21 @@ fun setCurrentUser(viewModel: MainActivityViewModel) = CoroutineScope(Dispatcher
         val docRef = db.collection(USERS_DB).document(auth.currentUser?.uid.toString())
         val user = docRef.get().await()
         viewModel.setCurrentUser(user.toObject<User>()!!)
+        val bytes = Firebase.storage.reference.child("images/${auth.currentUser?.uid}").getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
+        //val picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        //viewModel.setCurrentPicture(picture)
     }catch(e: Exception){
         Log.d("CurrentUser_Exception", e.message.toString())
     }
 }
 
-fun getUsersByPoints() = CoroutineScope(Dispatchers.IO).launch {
+fun setCurrentPicture(viewModel: MainActivityViewModel) = CoroutineScope(Dispatchers.IO).launch {
     try {
-        val db = FirebaseFirestore.getInstance()
-        val docRef = db.collection(USERS_DB)
-        val users = mutableListOf<User>()
-        val querySnapshot = docRef.orderBy("points").get().await()
-        for(document in querySnapshot){
-            val user = document.toObject<User>()
-            users.add(user)
-        }
-        Log.d("Users_log", users.toString())
-
-    } catch (e: Exception) {
-        Log.d("CurrentUser_Exception", e.message.toString())
+        val auth = FirebaseAuth.getInstance()
+        val bytes = Firebase.storage.reference.child("images/${auth.currentUser?.uid}").getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
+        val picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        viewModel.setCurrentPicture(picture)
+    }catch(e: Exception){
+        Log.d("CurrPicture_Exception", e.message.toString())
     }
 }

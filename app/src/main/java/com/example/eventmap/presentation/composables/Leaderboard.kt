@@ -25,25 +25,7 @@ import com.google.firebase.firestore.ktx.toObject
 
 @Composable
 fun Leaderboard(navController: NavController, usersViewModel: UsersViewModel) {
-    val docRef = FirebaseFirestore.getInstance().collection(USERS_DB).orderBy("points")
-    docRef.addSnapshotListener { snapshot, e ->
-        if (e != null) {
-            Log.d("Listener_Debug", "Listen failed.", e)
-            return@addSnapshotListener
-        }
-        if (snapshot != null) {
-            Log.d("Listener_Debug", "Current data: ${snapshot.documents}")
-            val users = mutableListOf<User>()
-            for (document in snapshot.documents) {
-                users.add(document.toObject<User>()!!)
-            }
-            usersViewModel.setAllUsers(users)
-        } else {
-            Log.d("Listener_Debug", "Current data: null")
-        }
-    }
     val sortedUsers = usersViewModel.data.value.sortedByDescending { it.points }
-    Log.d("Leaderboard", sortedUsers.toString())
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,

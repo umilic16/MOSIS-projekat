@@ -1,5 +1,6 @@
 package com.example.eventmap.presentation.composables
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -23,15 +24,22 @@ import androidx.navigation.NavController
 import com.example.eventmap.R
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.presentation.theme.ui.*
+import com.example.eventmap.presentation.utils.addUsersListener
+import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
+import com.example.eventmap.presentation.viewmodels.UsersViewModel
+import com.example.eventmap.utils.setCurrentPicture
+import com.example.eventmap.utils.setCurrentUser
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun Login(navController: NavController) {
+fun Login(navController: NavController, viewModel: MainActivityViewModel, usersViewModel: UsersViewModel) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val showPassword = remember { mutableStateOf(false) }
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
+    //Log.d("LogDebug",navController.previousBackStackEntry.toString())
+    //navController.popBackStack("Home", true)
     //ceo container
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -104,6 +112,9 @@ fun Login(navController: NavController) {
                         } else {
                             auth.signInWithEmailAndPassword(email.value, password.value)
                                 .addOnSuccessListener {
+                                    setCurrentUser(viewModel = viewModel)
+                                    setCurrentPicture(viewModel = viewModel)
+                                    navController.popBackStack("Login", true)
                                     navController.navigate("Home")
                                 }
                                 .addOnFailureListener {

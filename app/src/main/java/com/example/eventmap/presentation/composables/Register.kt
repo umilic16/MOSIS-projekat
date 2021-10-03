@@ -1,36 +1,67 @@
 package com.example.eventmap.presentation.composables
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.eventmap.R
 import com.example.eventmap.components.CustomTextField
+import com.example.eventmap.components.ImageHolder
 import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.*
+import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.utils.saveUser
 import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
-fun Register(navController: NavController) {
+fun Register(navController: NavController, viewModel: MainActivityViewModel) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val repeatedPassword = remember { mutableStateOf("") }
     val showPassword = remember { mutableStateOf(false) }
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
+
+    //slika
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    val bitmap = remember { mutableStateOf<Bitmap>(BitmapFactory.decodeResource(context.resources, R.drawable.profile2_white)) }
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
+        //zbog ispitivanja uslova
+        imageUri=uri
+        if(imageUri != null) {
+            if (Build.VERSION.SDK_INT < 28) {
+                bitmap.value = MediaStore.Images
+                    .Media.getBitmap(context.contentResolver, imageUri)
+
+            } else {
+                val source = ImageDecoder
+                    .createSource(context.contentResolver, imageUri!!)
+                bitmap.value = ImageDecoder.decodeBitmap(source)
+            }
+        }
+    }
+
     //ceo container
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -40,12 +71,28 @@ fun Register(navController: NavController) {
             .fillMaxHeight()
             .padding(PaddingMedium)
     ) {
-        Spacer(modifier = Modifier.padding(PaddingExtra))
-        Text(
-            text = "Create your account",
-            color = DefaultWhite,
-            fontSize = 20.sp,
+        //image
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
+        ) {
+            //Log.d("Image_debug", imageUri.toString())
+            ImageHolder(
+                bitmap = bitmap.value.asImageBitmap(),
+                modifier = Modifier
+                    .size(150.dp)
+                    .clickable {
+                        launcher.launch("image/*")
+                    }
+            )
+        }
+        Spacer(modifier = Modifier.padding(PaddingSmall))
+        Text(
+            text = "Select image",
+            color = DefaultWhite,
+            modifier = Modifier.clickable(onClick = {
+                launcher.launch("image/*")
+            })
         )
         //input boxes i forgot pass
         Spacer(modifier = Modifier.padding(PaddingMedium))
@@ -111,12 +158,23 @@ fun Register(navController: NavController) {
                                 "Passwords dont match!",
                                 Toast.LENGTH_SHORT
                             ).show()
+                        }else if(imageUri==null) {
+                            Toast.makeText(
+                                context,
+                                "Choose an profile picture!",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         } else {
                             auth.createUserWithEmailAndPassword(email.value, password.value)
                                 .addOnSuccessListener {
+                                    val user = User(email.value, password.value)
                                     saveUser(
-                                        User(email.value, password = password.value)
+                                        user , imageUri!!
                                     )
+                                    viewModel.setCurrentUser(user)
+                                    viewModel.setCurrentPicture(bitmap = bitmap.value)
+                                    //Log.d("LogDebug", navController.graph.startDestinationRoute.toString())
+                                    navController.popBackStack("Login", true)
                                     navController.navigate("Home")
                                 }
                                 .addOnFailureListener {
@@ -156,4 +214,48 @@ fun Register(navController: NavController) {
             })
         )
     }
+}
+
+@Composable
+fun ImageContainer() {
+    val context = LocalContext.current
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    val bitmap = remember { mutableStateOf<Bitmap?>(BitmapFactory.decodeResource(context.resources, R.drawable.profile2_white)) }
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
+        //zbog ispitivanja uslova
+        imageUri=uri
+        if (Build.VERSION.SDK_INT < 28) {
+            bitmap.value = MediaStore.Images
+                .Media.getBitmap(context.contentResolver, imageUri)
+
+        } else {
+            val source = ImageDecoder
+                .createSource(context.contentResolver, imageUri!!)
+            bitmap.value = ImageDecoder.decodeBitmap(source)
+        }
+    }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Log.d("Image_debug", imageUri.toString())
+        bitmap.value?.let { btm ->
+            ImageHolder(
+                bitmap = btm.asImageBitmap(),
+                modifier = Modifier
+                    .size(150.dp)
+                    .clickable {
+                        launcher.launch("image/*")
+                    }
+            )
+        }
+    }
+    Spacer(modifier = Modifier.padding(PaddingSmall))
+    Text(
+        text = "Select image",
+        color = DefaultWhite,
+        modifier = Modifier.clickable(onClick = {
+            launcher.launch("image/*")
+        })
+    )
 }

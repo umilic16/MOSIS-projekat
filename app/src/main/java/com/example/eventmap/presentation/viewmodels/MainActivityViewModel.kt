@@ -1,5 +1,7 @@
 package com.example.eventmap.presentation.viewmodels
 
+import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
@@ -19,10 +21,18 @@ class MainActivityViewModel:ViewModel() {
     private var _locationPermissionGranted = MutableLiveData(false)
     var locationPermissionGranted : LiveData<Boolean> = _locationPermissionGranted
 
-    private var _currentUser = mutableStateOf(User())
+    private var _currentUser = mutableStateOf(null) as MutableState<User>
     var currentUser: MutableState<User> = _currentUser
 
+    private var _picture = mutableStateOf(null) as MutableState<Bitmap>
+    var picture : MutableState<Bitmap> = _picture
+
+    fun setCurrentPicture(bitmap: Bitmap){
+        _picture.value = bitmap
+    }
+
     fun setCurrentUser(user: User){
+        //Log.d("LogDebug", "Pozvan sam ${user}")
         _currentUser.value = user
     }
 
