@@ -18,6 +18,20 @@ class UsersViewModel: ViewModel() {
         Log.d("Users_Debug", "Added in view model")
         _pictures.value[id] = bitmap
     }
+    private var _currentUser = mutableStateOf(null) as MutableState<User>
+    var currentUser: MutableState<User> = _currentUser
+
+    private var _picture = mutableStateOf(null) as MutableState<Bitmap>
+    var picture : MutableState<Bitmap> = _picture
+
+    fun setCurrentPicture(bitmap: Bitmap){
+        _picture.value = bitmap
+    }
+
+    fun setCurrentUser(user: User){
+        //Log.d("LogDebug", "Pozvan sam $user}")
+        _currentUser.value = user
+    }
 
     fun setAllUsers(users: List<User>){
         _data.value = users

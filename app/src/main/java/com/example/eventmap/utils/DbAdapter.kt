@@ -5,22 +5,25 @@ import android.net.Uri
 import android.util.Log
 import com.example.eventmap.data.Event
 import com.example.eventmap.data.User
+import com.example.eventmap.notification.NotificationAdapter.sendNotification
+import com.example.eventmap.notification.NotificationData
+import com.example.eventmap.notification.PushNotification
 import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.utils.Constants.EVENTS_DB
+import com.example.eventmap.utils.Constants.MAX_DOWNLOAD_SIZE
 import com.example.eventmap.utils.Constants.USERS_DB
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 fun checkIfLoggedIn(): Boolean {
     val auth = FirebaseAuth.getInstance()
@@ -33,9 +36,9 @@ fun saveUser(user: User, picture: Uri) = CoroutineScope(Dispatchers.IO).launch{
         val userId = auth.currentUser!!.uid
         FirebaseFirestore.getInstance().collection(USERS_DB).document(userId)
             .set(user).await()
-        Firebase.storage.reference.child("images/${userId}").putFile(picture).await()
+        Firebase.storage.reference.child("images/$userId").putFile(picture).await()
     }catch (e: Exception){
-        Log.d("SaveUser_Exception", e.message.toString())
+        Log.d("DbAdapter_Exception1", e.message.toString())
     }
 }
 
@@ -45,13 +48,32 @@ fun updateUsername(username: String) = CoroutineScope(Dispatchers.IO).launch{
         FirebaseFirestore.getInstance().collection(USERS_DB).document(auth.currentUser!!.uid)
             .update("username", username).await()
     }    catch (e: Exception) {
-        Log.d("UpdateUser_Exception", e.message.toString())
+        Log.d("DbAdapter_Exception2", e.message.toString())
     }
 }
 
-fun updateLocation(location: GeoPoint){
-    val auth = FirebaseAuth.getInstance()
-    FirebaseFirestore.getInstance().collection("users_db").document(auth.currentUser!!.uid).update("location", location)
+fun addSendRequestToUsers(sendingTo: User) = CoroutineScope(Dispatchers.IO).launch {
+    try {
+        val auth = FirebaseAuth.getInstance()
+        //dodaje u listu poslatih zahteva trenutnog korisnika id korinsika kom se salje
+        FirebaseFirestore.getInstance().collection(USERS_DB).document(auth.currentUser!!.uid)
+            .update("sentRequests", FieldValue.arrayUnion(sendingTo.userId)).await()
+        //dodaje u listu primljenih zahteva currentUser.id korinsiku kom se salje zahtev
+        FirebaseFirestore.getInstance().collection(USERS_DB).document(sendingTo.userId)
+            .update("receivedRequests", FieldValue.arrayUnion(auth.currentUser!!.uid)).await()
+    }    catch (e: Exception) {
+        Log.d("DbAdapter_Exception3", e.message.toString())
+    }
+}
+
+fun updateToken(token: String) = CoroutineScope(Dispatchers.IO).launch {
+    try {
+        val auth = FirebaseAuth.getInstance()
+        FirebaseFirestore.getInstance().collection(USERS_DB).document(auth.currentUser!!.uid)
+            .update("token", token).await()
+    }    catch (e: Exception) {
+        Log.d("DbAdapter_Exception4", e.message.toString())
+    }
 }
 
 fun saveEvent(event: Event)  = CoroutineScope(Dispatchers.IO).launch {
@@ -61,11 +83,11 @@ fun saveEvent(event: Event)  = CoroutineScope(Dispatchers.IO).launch {
         FirebaseFirestore.getInstance().collection(USERS_DB).document(auth.currentUser!!.uid)
             .update("numOfEvents", FieldValue.increment(1)).await()
     }catch(e: Exception){
-        Log.d("SaveEvent_Exception", e.message.toString())
+        Log.d("DbAdapter_Exception5", e.message.toString())
     }
 }
 
-fun setCurrentUser(viewModel: MainActivityViewModel) = CoroutineScope(Dispatchers.IO).launch {
+fun setCurrentUser(viewModel: UsersViewModel) = CoroutineScope(Dispatchers.IO).launch {
     try {
         val auth = FirebaseAuth.getInstance()
         val db = FirebaseFirestore.getInstance()
@@ -76,29 +98,31 @@ fun setCurrentUser(viewModel: MainActivityViewModel) = CoroutineScope(Dispatcher
         //val picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         //viewModel.setCurrentPicture(picture)
     }catch(e: Exception){
-        Log.d("CurrentUser_Exception", e.message.toString())
+        Log.d("DbAdapter_Exception6", e.message.toString())
     }
 }
 
-fun setCurrentPicture(viewModel: MainActivityViewModel) = CoroutineScope(Dispatchers.IO).launch {
+fun setCurrentPicture(viewModel: UsersViewModel) = CoroutineScope(Dispatchers.IO).launch {
     try {
         val auth = FirebaseAuth.getInstance()
         val bytes = Firebase.storage.reference.child("images/${auth.currentUser?.uid}").getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
-        val picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-        viewModel.setCurrentPicture(picture)
+        val picture = BitmapFactory.decodeByteArray(bytes,0, bytes.size)
+        withContext(Dispatchers.Main){
+            viewModel.setCurrentPicture(picture)
+        }
     }catch(e: Exception){
-        Log.d("CurrPicture_Exception", e.message.toString())
+        Log.d("DbAdapter_Exception7", e.message.toString())
     }
 }
 
 fun getPicture(viewModel: UsersViewModel, id: String) = CoroutineScope(Dispatchers.IO).launch {
     try{
         //delay(1000)
-        val bytes = Firebase.storage.reference.child("images/${id}").getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
+        val bytes = Firebase.storage.reference.child("images/$id").getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
         val picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         //Log.d("Add_Debug", "Got picture")
         viewModel.addPicture(id,picture)
     }catch(e: Exception){
-        Log.d("LoadPictre_Exception", e.message.toString())
+        Log.d("DbAdapter_Exception", e.message.toString())
     }
 }

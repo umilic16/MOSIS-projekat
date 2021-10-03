@@ -30,12 +30,14 @@ import com.example.eventmap.components.ImageHolder
 import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
+import com.example.eventmap.presentation.viewmodels.UsersViewModel
+import com.example.eventmap.services.FirebaseService.Companion.token
 import com.example.eventmap.utils.saveUser
 import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
-fun Register(navController: NavController, viewModel: MainActivityViewModel) {
+fun Register(navController: NavController, viewModel: UsersViewModel) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val repeatedPassword = remember { mutableStateOf("") }
@@ -61,7 +63,6 @@ fun Register(navController: NavController, viewModel: MainActivityViewModel) {
             }
         }
     }
-
     //ceo container
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -80,7 +81,7 @@ fun Register(navController: NavController, viewModel: MainActivityViewModel) {
             ImageHolder(
                 bitmap = bitmap.value.asImageBitmap(),
                 modifier = Modifier
-                    .size(150.dp)
+                    .size(120.dp)
                     .clickable {
                         launcher.launch("image/*")
                     }
@@ -143,7 +144,7 @@ fun Register(navController: NavController, viewModel: MainActivityViewModel) {
                         })
                     )
                 }
-                Spacer(modifier = Modifier.padding(PaddingLarge))
+                Spacer(modifier = Modifier.padding(PaddingMedium))
                 Button(
                     onClick = {
                         if (email.value.isEmpty() || password.value.isEmpty()) {
@@ -158,7 +159,7 @@ fun Register(navController: NavController, viewModel: MainActivityViewModel) {
                                 "Passwords dont match!",
                                 Toast.LENGTH_SHORT
                             ).show()
-                        }else if(imageUri==null) {
+                        } else if (imageUri == null) {
                             Toast.makeText(
                                 context,
                                 "Choose an profile picture!",
@@ -167,9 +168,14 @@ fun Register(navController: NavController, viewModel: MainActivityViewModel) {
                         } else {
                             auth.createUserWithEmailAndPassword(email.value, password.value)
                                 .addOnSuccessListener {
-                                    val user = User(userId = it.user?.uid.toString(),email = email.value, password = password.value)
+                                    val user = User(
+                                        userId = it.user?.uid.toString(),
+                                        email = email.value,
+                                        password = password.value,
+                                        token = token!!
+                                    )
                                     saveUser(
-                                        user , imageUri!!
+                                        user, imageUri!!
                                     )
                                     viewModel.setCurrentUser(user)
                                     viewModel.setCurrentPicture(bitmap = bitmap.value)
@@ -181,18 +187,18 @@ fun Register(navController: NavController, viewModel: MainActivityViewModel) {
                                     //Log.d("Register_Exception", it.toString())
                                     Toast.makeText(
                                         context,
-                                        "Authentication error\n${it.localizedMessage}",
+                                        "Authentication error\n$it.localizedMessage",
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
                         }
                     },
                     modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                        .height(50.dp)
+                        .fillMaxWidth(0.4f)
+                        .height(40.dp)
                         .shadow(elevation = 5.dp)
                 ) {
-                    Text(text = "Register", fontSize = 20.sp)
+                    Text(text = "Register", fontSize = 18.sp)
                 }
             }
         }

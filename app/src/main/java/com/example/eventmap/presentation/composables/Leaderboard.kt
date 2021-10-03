@@ -24,8 +24,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 
 @Composable
-fun Leaderboard(navController: NavController, usersViewModel: UsersViewModel) {
-    val sortedUsers = usersViewModel.data.value.sortedByDescending { it.points }
+fun Leaderboard(navController: NavController, viewModel: UsersViewModel) {
+    val sortedUsers = viewModel.data.value.sortedByDescending { it.points }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -71,7 +71,7 @@ fun LeaderboardItem(position: Int, email: String, points: Int){
             fontSize = 16.sp
         )
         Text(
-            text= "points: ${points.toString()}",
+            text= "points: $points",
             color= DarkBlue,
             fontSize = 18.sp
         )

@@ -1,11 +1,9 @@
 package com.example.eventmap.presentation.composables
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -13,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -24,7 +21,6 @@ import androidx.navigation.NavController
 import com.example.eventmap.R
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.presentation.theme.ui.*
-import com.example.eventmap.presentation.utils.addUsersListener
 import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.utils.setCurrentPicture
@@ -32,7 +28,7 @@ import com.example.eventmap.utils.setCurrentUser
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun Login(navController: NavController, viewModel: MainActivityViewModel, usersViewModel: UsersViewModel) {
+fun Login(navController: NavController, viewModel: UsersViewModel) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val showPassword = remember { mutableStateOf(false) }
@@ -51,7 +47,7 @@ fun Login(navController: NavController, viewModel: MainActivityViewModel, usersV
             .padding(PaddingMedium)
     ) {
         //logo
-        Spacer(modifier = Modifier.padding(PaddingExtra))
+        //Spacer(modifier = Modifier.padding(PaddingLarge))
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             //zbog testiranja
@@ -60,10 +56,11 @@ fun Login(navController: NavController, viewModel: MainActivityViewModel, usersV
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "logo",
-                alignment = Alignment.Center
+                alignment = Alignment.Center,
+                modifier = Modifier.size(220.dp)
             )
         }
-        Spacer(modifier = Modifier.padding(PaddingExtra))
+        //Spacer(modifier = Modifier.padding(PaddingLarge))
         //input boxes i forgot pass
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -93,7 +90,10 @@ fun Login(navController: NavController, viewModel: MainActivityViewModel, usersV
                 )
                 Spacer(modifier = Modifier.padding(PaddingSmall))
                 //forgot password
-                Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(
                         text = "Forgot your password?",
                         color = DefaultBlue,
@@ -128,11 +128,11 @@ fun Login(navController: NavController, viewModel: MainActivityViewModel, usersV
                         }
                     },
                     modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                        .height(50.dp)
+                        .fillMaxWidth(0.4f)
+                        .height(40.dp)
                         .shadow(elevation = 5.dp)
                 ) {
-                    Text(text = "Login", fontSize = 20.sp)
+                    Text(text = "Login", fontSize = 18.sp)
                 }
             }
         }

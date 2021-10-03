@@ -23,12 +23,12 @@ fun Navigation(navController: NavController, viewModel: MainActivityViewModel, f
             "Login"
         },
         builder = {
-            composable(route = "Login", content = { Login(navController = navController, viewModel = viewModel, usersViewModel = usersViewModel) })
-            composable(route = "Register", content = { Register(navController = navController, viewModel = viewModel) })
-            composable(route = "Home", content = { Home(navController = navController, viewModel = viewModel, usersViewModel = usersViewModel) })
-            composable(route = "Map", content = { MapView(navController = navController, viewModel = viewModel, fusedLocationProviderClient = fusedLocationProviderClient) })
+            composable(route = "Login", content = { Login(navController = navController, viewModel = usersViewModel) })
+            composable(route = "Register", content = { Register(navController = navController, viewModel = usersViewModel) })
+            composable(route = "Home", content = { Home(navController = navController, viewModel = usersViewModel) })
+            composable(route = "Map", content = { MapView(navController = navController, fusedLocationProviderClient = fusedLocationProviderClient) })
             composable(route = "CreateEvent", content = { CreateEventView(navController = navController, fusedLocationProviderClient = fusedLocationProviderClient) })
             composable(route = "Leaderboard", content = { Leaderboard(navController = navController, usersViewModel) })
-            composable(route = "Account", content = { AccountView(navController = navController, viewModel = viewModel) })
+            composable(route = "Account", content = { AccountView(navController = navController, viewModel = usersViewModel) })
         })
 }

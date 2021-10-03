@@ -1,6 +1,7 @@
 package com.example.eventmap.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -39,7 +40,7 @@ fun CustomTextField(
     readOnly: Boolean = false,
     style:TextStyle = TextStyle(
         fontWeight = FontWeight.W500,
-        fontSize = 16.sp
+        fontSize = 14.sp
     ),
     isPasswordVisible: Boolean = false,
     onPasswordToggleClick: (Boolean) -> Unit = {},
@@ -50,7 +51,7 @@ fun CustomTextField(
         onValueChange = onValueChange,
         textStyle = style,
         placeholder = {
-            Text(text = hint)
+            Text(text = hint, fontSize = 14.sp)
         },
         isError = isError,
         keyboardOptions = KeyboardOptions(
@@ -85,7 +86,8 @@ fun CustomTextField(
         modifier = modifier
             .fillMaxWidth()
             .shadow(elevation = 5.dp)
-            .clip(RoundedCornerShape(5.dp)),
+            .clip(RoundedCornerShape(5.dp))
+            .height(50.dp),
         colors = colors,
         readOnly = readOnly,
     )

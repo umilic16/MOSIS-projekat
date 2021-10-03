@@ -3,11 +3,13 @@ package com.example.eventmap.presentation.composables
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -27,40 +29,49 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventmap.components.ImageHolder
 import com.example.eventmap.data.User
+import com.example.eventmap.notification.NotificationAdapter.sendNotification
+import com.example.eventmap.notification.NotificationData
+import com.example.eventmap.notification.PushNotification
 import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.utils.addUsersListener
 import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
-import com.example.eventmap.utils.getPicture
-import com.example.eventmap.utils.setCurrentUser
+import com.example.eventmap.utils.*
+
+const val TOPIC = "/topics/myTopic"
 
 @Composable
-fun Home(navController: NavController,viewModel: MainActivityViewModel, usersViewModel: UsersViewModel) {
+fun Home(navController: NavController, viewModel: UsersViewModel) {
     //Log.d("LogDebug",navController.previousBackStackEntry.toString())
-    val users = usersViewModel.data.value
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(0.93f)
-            .padding(PaddingMedium)
-    ) {
-
-        LazyColumn(
+    val users = viewModel.data.value
+    val currentUser = viewModel.currentUser.value
+    //baca exception da je current user null
+    if(currentUser!= null) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier
-                .clip(RoundedCornerShape(5.dp))
-                .shadow(elevation = 5.dp)
+                .fillMaxWidth()
+                .fillMaxHeight(0.93f)
+                .padding(PaddingMedium)
         ) {
-            items(items = users) { user ->
-                    UserLazyColumn(user = user)
+            LazyColumn(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(5.dp))
+                    .shadow(elevation = 5.dp)
+            ) {
+                //Log.d("HelpMe", "USERS: $users\nCURRENT: $currentUser")
+                items(items = users) { user ->
+                    if (user.userId != currentUser.userId)
+                        UserLazyColumn(user = user, currentUser = currentUser)
+                }
             }
         }
     }
 }
 
 @Composable
-fun UserLazyColumn(user: User){
+fun UserLazyColumn(user: User, currentUser: User){
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -109,7 +120,7 @@ fun UserLazyColumn(user: User){
             ) {
                 Row(horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(0.7f)) {
+                    modifier = Modifier.weight(0.5f)) {
                     Text(
                         text = "friends: ${user.numOfFriends}",
                         color = DefaultBlue,
@@ -120,23 +131,78 @@ fun UserLazyColumn(user: User){
                         color = DefaultBlue,
                         fontSize = 15.sp
                     )
-                    Text(
-                        text = "points: ${user.points}",
-                        color = DefaultBlue,
-                        fontSize = 15.sp
-                    )
                 }
                 Row(horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(0.3f)) {
-                    Icon(
-                        imageVector = Icons.Default.PersonAdd,
-                        contentDescription = null,
-                        tint = DarkBlue,
-                    )
+                    modifier = Modifier.weight(0.5f)) {
+                    if (checkIfFriends(currentUser,user.userId)) {
+                        Text(
+                            text = "Friend",
+                            color = DefaultBlue,
+                            fontSize = 14.sp
+                        )
+                    } else if(
+                        checkIfRequestSent(currentUser,user.userId)) {
+                        Text(
+                            text = "Request sent!",
+                            color = DefaultBlue,
+                            fontSize = 14.sp
+                        )
+                    }else if(checkIfRequestReceived(currentUser,user.userId)) {
+                        Text(
+                            text = "Accept",
+                            color = DarkBlue,
+                            fontSize = 14.sp,
+                            modifier = Modifier.clickable {
+                                //accept request
+                            }
+                        )
+                    }
+                    else {
+                        Icon(
+                            imageVector = Icons.Default.PersonAdd,
+                            contentDescription = null,
+                            tint = DarkBlue,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clickable {
+                                //send request
+                                sendFriendRequest(currentUser = currentUser, sendingToUser = user)
+                            }
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+
+fun sendFriendRequest(currentUser: User, sendingToUser: User) {
+    try {
+        //upisi u bazu
+        addSendRequestToUsers(sendingTo = sendingToUser)
+        val nameOrMail = if (currentUser.username.isNullOrEmpty()) {
+            currentUser.email
+        } else {
+            currentUser.username
+        }
+        val recipientToken = sendingToUser.token
+        if (recipientToken != null) {
+            //napravi push notifikaciju
+            PushNotification(
+                NotificationData(
+                    "Friend request",
+                    "You received a friend request from: $nameOrMail"
+                ),
+                recipientToken
+            ).also {
+                //posalji
+                sendNotification(it)
+            }
+        }
+    } catch (e: Exception) {
+        Log.d("FReq_Exception", e.message.toString())
     }
 }
 

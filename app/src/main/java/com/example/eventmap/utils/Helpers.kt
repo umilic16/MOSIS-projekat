@@ -4,11 +4,25 @@ import android.net.Uri
 import com.example.eventmap.data.User
 import com.google.firebase.auth.FirebaseAuth
 
-fun getRandomString(length: Int) : String {
-    val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-    return (1..length)
-        .map { allowedChars.random() }
-        .joinToString("")
+fun checkIfFriends(currentUser: User, checkingUserId: String): Boolean{
+    if(currentUser.friends != null){
+        return currentUser.friends.contains(checkingUserId)
+    }
+    return false
+}
+
+fun checkIfRequestSent(currentUser: User, checkingUserId: String): Boolean{
+    if(currentUser.sentRequests != null){
+        return currentUser.sentRequests.contains(checkingUserId)
+    }
+    return false
+}
+
+fun checkIfRequestReceived(currentUser: User, checkingUserId: String): Boolean{
+    if(currentUser.receivedRequests != null){
+        return currentUser.receivedRequests.contains(checkingUserId)
+    }
+    return false
 }
 
 /*fun addRandomUsers(numOfUsers: Int, lengthOfEmail: Int){
@@ -21,4 +35,13 @@ fun getRandomString(length: Int) : String {
                 )
             }
     }
-}*/
+}
+
+fun getRandomString(length: Int) : String {
+    val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+    return (1..length)
+        .map { allowedChars.random() }
+        .joinToString("")
+}
+
+*/

@@ -24,9 +24,8 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
 @Composable
-fun MapView(navController: NavController, viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient) {
+fun MapView(navController: NavController, fusedLocationProviderClient: FusedLocationProviderClient) {
     val mapView = rememberMapViewLifecycle()
-    val context = LocalContext.current
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView({ mapView }) {
             CoroutineScope(Dispatchers.Main).launch {
@@ -62,7 +61,7 @@ fun MapView(navController: NavController, viewModel: MainActivityViewModel, fuse
             }
         }
     } catch (e: SecurityException) {
-        Log.d("Exception", "Exception:  $e.message.toString()")
+        Log.d("Exception", "Exception:  $e.message")
 
     }
 }*/
@@ -75,9 +74,9 @@ fun MapView(navController: NavController, viewModel: MainActivityViewModel, fuse
             val location = document.getGeoPoint("location")
             if(location!=null) {
                 //Log.d("MARKERSLOC", location.toString())
-                //Log.d("MARKERSLL", "${email} LOCATION: ${location.latitude}${location.longitude}")
+                //Log.d("MARKERSLL", "$email LOCATION: $location.latitude, $location.longitude")
                 map.addMarker(markerOptions {
-                    this.title("User: ${email}")
+                    this.title("User: $email")
                     this.position(LatLng(location.latitude, location.longitude))
                 })
             }
@@ -93,7 +92,7 @@ fun markEvents(map: GoogleMap, viewModel: MainActivityViewModel){
             val location = document.getGeoPoint("location")
             if(location!=null) {
                 map.addMarker(markerOptions {
-                    this.title("${title}: ${desc}")
+                    this.title("$title: $desc")
                     this.position(LatLng(location.latitude, location.longitude))
                     this.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                 })
