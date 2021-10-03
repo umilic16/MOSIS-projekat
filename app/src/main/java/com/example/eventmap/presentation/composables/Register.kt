@@ -167,7 +167,7 @@ fun Register(navController: NavController, viewModel: MainActivityViewModel) {
                         } else {
                             auth.createUserWithEmailAndPassword(email.value, password.value)
                                 .addOnSuccessListener {
-                                    val user = User(email.value, password.value)
+                                    val user = User(userId = it.user?.uid.toString(),email = email.value, password = password.value)
                                     saveUser(
                                         user , imageUri!!
                                     )

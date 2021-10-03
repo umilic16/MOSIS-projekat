@@ -6,6 +6,7 @@ import android.util.Log
 import com.example.eventmap.data.Event
 import com.example.eventmap.data.User
 import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
+import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.utils.Constants.EVENTS_DB
 import com.example.eventmap.utils.Constants.USERS_DB
 import com.google.firebase.auth.FirebaseAuth
@@ -17,6 +18,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -70,7 +72,7 @@ fun setCurrentUser(viewModel: MainActivityViewModel) = CoroutineScope(Dispatcher
         val docRef = db.collection(USERS_DB).document(auth.currentUser?.uid.toString())
         val user = docRef.get().await()
         viewModel.setCurrentUser(user.toObject<User>()!!)
-        val bytes = Firebase.storage.reference.child("images/${auth.currentUser?.uid}").getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
+        Firebase.storage.reference.child("images/${auth.currentUser?.uid}").getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
         //val picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         //viewModel.setCurrentPicture(picture)
     }catch(e: Exception){
@@ -86,5 +88,17 @@ fun setCurrentPicture(viewModel: MainActivityViewModel) = CoroutineScope(Dispatc
         viewModel.setCurrentPicture(picture)
     }catch(e: Exception){
         Log.d("CurrPicture_Exception", e.message.toString())
+    }
+}
+
+fun getPicture(viewModel: UsersViewModel, id: String) = CoroutineScope(Dispatchers.IO).launch {
+    try{
+        //delay(1000)
+        val bytes = Firebase.storage.reference.child("images/${id}").getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
+        val picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        //Log.d("Add_Debug", "Got picture")
+        viewModel.addPicture(id,picture)
+    }catch(e: Exception){
+        Log.d("LoadPictre_Exception", e.message.toString())
     }
 }

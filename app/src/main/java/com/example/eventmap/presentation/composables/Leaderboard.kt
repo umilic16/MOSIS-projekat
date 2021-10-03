@@ -32,11 +32,13 @@ fun Leaderboard(navController: NavController, usersViewModel: UsersViewModel) {
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(0.93f)
-            .padding(PaddingMedium)
-            .clip(RoundedCornerShape(5.dp))
-            .shadow(elevation = 5.dp)
+
     ) {
         LazyColumn(
+            modifier = Modifier
+                .padding(PaddingMedium)
+                .clip(RoundedCornerShape(5.dp))
+                .shadow(elevation = 5.dp)
         ) {
             itemsIndexed(items = sortedUsers) { i, user ->
                 LeaderboardItem(i + 1, user.email, user.points)
