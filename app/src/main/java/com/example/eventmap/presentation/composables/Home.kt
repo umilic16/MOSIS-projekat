@@ -154,7 +154,7 @@ fun UserLazyColumn(user: User, currentUser: User){
                             color = DarkBlue,
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                //accept request
+                                acceptFriend(currentUser = currentUser, newFriend = user)
                             }
                         )
                     }
@@ -201,6 +201,35 @@ fun sendFriendRequest(currentUser: User, sendingToUser: User) {
                 sendNotification(it)
             }
         }
+    } catch (e: Exception) {
+        Log.d("FReq_Exception", e.message.toString())
+    }
+}
+
+fun acceptFriend(currentUser: User, newFriend: User){
+    try {
+        //obrisi iz baze
+        removeRequestsFromDatabase(newFriend = newFriend)
+        addFriendToDatabase(newFriend = newFriend)
+        /*val nameOrMail = if (currentUser.username.isNullOrEmpty()) {
+            currentUser.email
+        } else {
+            currentUser.username
+        }
+        val recipient = newFriend.token
+        if (recipient != null) {
+            //napravi push notifikaciju
+            PushNotification(
+                NotificationData(
+                    "New friend",
+                    "$nameOrMail accepted your request"
+                ),
+                recipient
+            ).also {
+                //posalji
+                sendNotification(it)
+            }
+        }*/
     } catch (e: Exception) {
         Log.d("FReq_Exception", e.message.toString())
     }

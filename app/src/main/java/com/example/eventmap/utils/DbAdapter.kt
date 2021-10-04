@@ -66,6 +66,36 @@ fun addSendRequestToUsers(sendingTo: User) = CoroutineScope(Dispatchers.IO).laun
     }
 }
 
+fun removeRequestsFromDatabase(newFriend: User) = CoroutineScope(Dispatchers.IO).launch {
+    try {
+        val auth = FirebaseAuth.getInstance()
+        //obrisi iz svoje liste dobijenih requesta usera koji si prihvatio
+        FirebaseFirestore.getInstance().collection(USERS_DB).document(auth.currentUser!!.uid)
+            .update("receivedRequests", FieldValue.arrayRemove(newFriend.userId)).await()
+        //obrisi iz liste poslatih zahteva u dokumentu novog prijatelja svoj id
+        FirebaseFirestore.getInstance().collection(USERS_DB).document(newFriend.userId)
+            .update("sentRequests", FieldValue.arrayRemove(auth.currentUser!!.uid)).await()
+    }    catch (e: Exception) {
+        Log.d("DbAdapter_Exception3", e.message.toString())
+    }
+}
+
+fun addFriendToDatabase(newFriend: User) = CoroutineScope(Dispatchers.IO).launch {
+    try {
+        val auth = FirebaseAuth.getInstance()
+        //dodaj u svoju listu novog prijatelja i inkrementiraj broj prijatelja
+        val user1 = FirebaseFirestore.getInstance().collection(USERS_DB).document(auth.currentUser!!.uid)
+        user1.update("friends", FieldValue.arrayUnion(newFriend.userId)).await()
+        user1.update("numOfFriends", FieldValue.increment(1)).await()
+        //dodaj u listu novog prijatelja sebe i inkrementiraj broj prijatelja
+        val user2 = FirebaseFirestore.getInstance().collection(USERS_DB).document(newFriend.userId)
+        user2.update("friends", FieldValue.arrayUnion(auth.currentUser!!.uid)).await()
+        user2.update("numOfFriends", FieldValue.increment(1)).await()
+    }    catch (e: Exception) {
+        Log.d("DbAdapter_Exception3", e.message.toString())
+    }
+}
+
 fun updateToken(token: String) = CoroutineScope(Dispatchers.IO).launch {
     try {
         val auth = FirebaseAuth.getInstance()

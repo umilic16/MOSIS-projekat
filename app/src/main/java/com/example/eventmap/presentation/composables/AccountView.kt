@@ -34,6 +34,7 @@ import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.services.FirebaseService.Companion.token
 import com.example.eventmap.utils.Constants
 import com.example.eventmap.utils.Constants.MAX_DOWNLOAD_SIZE
+import com.example.eventmap.utils.setCurrentUser
 import com.example.eventmap.utils.updateUsername
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
@@ -72,7 +73,7 @@ fun AccountView(navController: NavController, viewModel: UsersViewModel) {
                 bitmap = it.asImageBitmap(),
                 modifier = Modifier
                     .size(150.dp)
-                    .rotate(90f)
+                    //.rotate(90f)
             )
         }
         Spacer(modifier = Modifier.padding(PaddingMedium))
@@ -178,6 +179,7 @@ fun AccountView(navController: NavController, viewModel: UsersViewModel) {
             text = "Sign out",
             color = DefaultWhite,
             modifier = Modifier.clickable(onClick = {
+                viewModel.setCurrentUser(User())
                 auth.signOut()
                 navController.popBackStack("Home", true)
                 navController.navigate("Login")
