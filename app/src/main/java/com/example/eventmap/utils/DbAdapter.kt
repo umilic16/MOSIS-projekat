@@ -5,17 +5,13 @@ import android.net.Uri
 import android.util.Log
 import com.example.eventmap.data.Event
 import com.example.eventmap.data.User
-import com.example.eventmap.notification.NotificationAdapter.sendNotification
-import com.example.eventmap.notification.NotificationData
-import com.example.eventmap.notification.PushNotification
-import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.utils.Constants.EVENTS_DB
-import com.example.eventmap.utils.Constants.MAX_DOWNLOAD_SIZE
 import com.example.eventmap.utils.Constants.USERS_DB
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
@@ -30,6 +26,17 @@ fun checkIfLoggedIn(): Boolean {
     return auth.currentUser!=null
 }
 
+fun updateLocation(newLocation: GeoPoint?) = CoroutineScope(Dispatchers.IO).launch{
+    try {
+        val auth = FirebaseAuth.getInstance()
+        FirebaseFirestore.getInstance().collection(USERS_DB).document(auth.currentUser!!.uid)
+            .update("location", newLocation).await()
+    }    catch (e: Exception) {
+        Log.d("DbAdapter_Exception", e.message.toString())
+    }
+
+}
+
 fun saveUser(user: User, picture: Uri) = CoroutineScope(Dispatchers.IO).launch{
     try {
         val auth = FirebaseAuth.getInstance()
@@ -38,7 +45,7 @@ fun saveUser(user: User, picture: Uri) = CoroutineScope(Dispatchers.IO).launch{
             .set(user).await()
         Firebase.storage.reference.child("images/$userId").putFile(picture).await()
     }catch (e: Exception){
-        Log.d("DbAdapter_Exception1", e.message.toString())
+        Log.d("DbAdapter_Exception", e.message.toString())
     }
 }
 
@@ -48,7 +55,7 @@ fun updateUsername(username: String) = CoroutineScope(Dispatchers.IO).launch{
         FirebaseFirestore.getInstance().collection(USERS_DB).document(auth.currentUser!!.uid)
             .update("username", username).await()
     }    catch (e: Exception) {
-        Log.d("DbAdapter_Exception2", e.message.toString())
+        Log.d("DbAdapter_Exception", e.message.toString())
     }
 }
 
@@ -76,7 +83,7 @@ fun removeRequestsFromDatabase(newFriend: User) = CoroutineScope(Dispatchers.IO)
         FirebaseFirestore.getInstance().collection(USERS_DB).document(newFriend.userId)
             .update("sentRequests", FieldValue.arrayRemove(auth.currentUser!!.uid)).await()
     }    catch (e: Exception) {
-        Log.d("DbAdapter_Exception3", e.message.toString())
+        Log.d("DbAdapter_Exception", e.message.toString())
     }
 }
 
@@ -92,7 +99,7 @@ fun addFriendToDatabase(newFriend: User) = CoroutineScope(Dispatchers.IO).launch
         user2.update("friends", FieldValue.arrayUnion(auth.currentUser!!.uid)).await()
         user2.update("numOfFriends", FieldValue.increment(1)).await()
     }    catch (e: Exception) {
-        Log.d("DbAdapter_Exception3", e.message.toString())
+        Log.d("DbAdapter_Exception", e.message.toString())
     }
 }
 
@@ -102,7 +109,7 @@ fun updateToken(token: String) = CoroutineScope(Dispatchers.IO).launch {
         FirebaseFirestore.getInstance().collection(USERS_DB).document(auth.currentUser!!.uid)
             .update("token", token).await()
     }    catch (e: Exception) {
-        Log.d("DbAdapter_Exception4", e.message.toString())
+        Log.d("DbAdapter_Exception", e.message.toString())
     }
 }
 
@@ -113,7 +120,7 @@ fun saveEvent(event: Event)  = CoroutineScope(Dispatchers.IO).launch {
         FirebaseFirestore.getInstance().collection(USERS_DB).document(auth.currentUser!!.uid)
             .update("numOfEvents", FieldValue.increment(1)).await()
     }catch(e: Exception){
-        Log.d("DbAdapter_Exception5", e.message.toString())
+        Log.d("DbAdapter_Exception", e.message.toString())
     }
 }
 
@@ -128,7 +135,7 @@ fun setCurrentUser(viewModel: UsersViewModel) = CoroutineScope(Dispatchers.IO).l
         //val picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         //viewModel.setCurrentPicture(picture)
     }catch(e: Exception){
-        Log.d("DbAdapter_Exception6", e.message.toString())
+        Log.d("DbAdapter_Exception", e.message.toString())
     }
 }
 
@@ -141,11 +148,11 @@ fun setCurrentPicture(viewModel: UsersViewModel) = CoroutineScope(Dispatchers.IO
             viewModel.setCurrentPicture(picture)
         }
     }catch(e: Exception){
-        Log.d("DbAdapter_Exception7", e.message.toString())
+        Log.d("DbAdapter_Exception", e.message.toString())
     }
 }
 
-fun getPicture(viewModel: UsersViewModel, id: String) = CoroutineScope(Dispatchers.IO).launch {
+/*fun getPicture(viewModel: UsersViewModel, id: String) = CoroutineScope(Dispatchers.IO).launch {
     try{
         //delay(1000)
         val bytes = Firebase.storage.reference.child("images/$id").getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
@@ -155,4 +162,4 @@ fun getPicture(viewModel: UsersViewModel, id: String) = CoroutineScope(Dispatche
     }catch(e: Exception){
         Log.d("DbAdapter_Exception", e.message.toString())
     }
-}
+}*/

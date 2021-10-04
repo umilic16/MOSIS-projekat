@@ -5,15 +5,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.composables.*
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.utils.checkIfLoggedIn
-import com.example.eventmap.utils.setCurrentUser
 import com.google.android.gms.location.FusedLocationProviderClient
 
 @Composable
-fun Navigation(navController: NavController, viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient, usersViewModel: UsersViewModel) {
+fun Navigation(navController: NavController, fusedLocationProviderClient: FusedLocationProviderClient, usersViewModel: UsersViewModel) {
    // val navController = rememberNavController()
     NavHost(navController = navController as NavHostController,
         startDestination = if (checkIfLoggedIn()){

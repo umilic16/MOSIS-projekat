@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.utils.rememberMapViewLifecycle
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.maps.CameraUpdateFactory
@@ -84,7 +82,7 @@ fun MapView(navController: NavController, fusedLocationProviderClient: FusedLoca
     }
 }*/
 
-fun markEvents(map: GoogleMap, viewModel: MainActivityViewModel){
+fun markEvents(map: GoogleMap){
     FirebaseFirestore.getInstance().collection("Events").get().addOnSuccessListener {
         for(document in it.documents){
             val title = document.data?.get("title")

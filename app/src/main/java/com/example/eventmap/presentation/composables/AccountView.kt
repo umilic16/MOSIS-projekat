@@ -1,8 +1,5 @@
 package com.example.eventmap.presentation.composables
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -24,26 +20,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.eventmap.R
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.components.ImageHolder
 import com.example.eventmap.data.User
-import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
-import com.example.eventmap.services.FirebaseService.Companion.token
-import com.example.eventmap.utils.Constants
-import com.example.eventmap.utils.Constants.MAX_DOWNLOAD_SIZE
-import com.example.eventmap.utils.setCurrentUser
 import com.example.eventmap.utils.updateUsername
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 @Composable
 fun AccountView(navController: NavController, viewModel: UsersViewModel) {
@@ -72,8 +55,8 @@ fun AccountView(navController: NavController, viewModel: UsersViewModel) {
             ImageHolder(
                 bitmap = it.asImageBitmap(),
                 modifier = Modifier
-                    .size(150.dp)
-                    //.rotate(90f)
+                    .size(120.dp)
+                //.rotate(90f)
             )
         }
         Spacer(modifier = Modifier.padding(PaddingMedium))
@@ -88,7 +71,7 @@ fun AccountView(navController: NavController, viewModel: UsersViewModel) {
             style = TextStyle(
                 fontWeight = FontWeight.W400,
             ),
-            hint = if (user.username!!.isNotEmpty()) user.username else "Enter your username",
+            hint = if (user?.username!!.isNotEmpty()) user.username else "Enter your username",
         )
         Spacer(modifier = Modifier.padding(PaddingSmall))
         CustomTextField(
@@ -179,7 +162,8 @@ fun AccountView(navController: NavController, viewModel: UsersViewModel) {
             text = "Sign out",
             color = DefaultWhite,
             modifier = Modifier.clickable(onClick = {
-                viewModel.setCurrentUser(User())
+                //viewModel.setCurrentUser(User())
+                viewModel.setLoggedIn(false)
                 auth.signOut()
                 navController.popBackStack("Home", true)
                 navController.navigate("Login")

@@ -1,8 +1,9 @@
 package com.example.eventmap.presentation
 import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Observer
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.eventmap.components.BottomNavBar
@@ -22,43 +24,61 @@ import com.example.eventmap.components.BottomNavItem
 import com.example.eventmap.presentation.theme.ui.EventMapTheme
 import com.example.eventmap.presentation.utils.Navigation
 import com.example.eventmap.presentation.utils.addUsersListener
-import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
-import com.example.eventmap.services.FirebaseService
+import com.example.eventmap.services.FirebaseService.Companion.sharedPref
 import com.example.eventmap.services.FirebaseService.Companion.token
-import com.example.eventmap.utils.checkIfLoggedIn
-import com.example.eventmap.utils.setCurrentPicture
-import com.example.eventmap.utils.setCurrentUser
-import com.example.eventmap.utils.updateToken
+import com.example.eventmap.services.TrackingService
+import com.example.eventmap.utils.*
+import com.example.eventmap.utils.Constants.ACTION_START_OR_RESUME_SERVICE
+import com.example.eventmap.utils.Constants.ACTION_STOP_SERVICE
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : ComponentActivity() {
-    private val viewModel by viewModels<MainActivityViewModel>()
     private val usersViewModel by viewModels<UsersViewModel>()
+    private var isFirstStart = true
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         //FirebaseAuth.getInstance().signOut()
-
-        FirebaseService.sharedPref = getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
+        //cloud messaging
+        sharedPref = getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
         FirebaseMessaging.getInstance().token.addOnSuccessListener {
             token = it
         }
+        getLocationPermission()
         //fused api za lokaciju
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        getLocationPermission()
-        //subsrcibe na topic za notifikaciju
-        //FirebaseMessaging.getInstance().subscribeToTopic(TOPIC)
-        if(checkIfLoggedIn()){
-            setCurrentUser(viewModel = usersViewModel)
-            setCurrentPicture(viewModel = usersViewModel)
-            updateToken(token!!)
-        }
-        addUsersListener(viewModel = usersViewModel)
+        //initial value
+        usersViewModel.loggedIn.postValue(checkIfLoggedIn())
+        usersViewModel.loggedIn.observe(this, { isLoggedIn ->
+            //Log.d("Login_Debug", "User logged in: $isLoggedIn")
+            if(isLoggedIn){
+                //procedura nakon logovanja
+                setCurrentUser(usersViewModel)
+                //register je sam postavlja jer je vec ucitao
+                if(usersViewModel.picture != null){
+                    setCurrentPicture(usersViewModel)
+                }
+                startOrResumeTrackingService(this)
+                addUsersListener(usersViewModel)
+                isFirstStart = false
+            } else if(!isFirstStart){
+                //procedura nakon sign out
+                stopTrackingService(this)
+                val registration = usersViewModel.listenerRegistration.value
+                //ukloni users listener (trebalo bi da registration nije null ali nema veze)
+                if(registration!=null){
+                    registration.remove()
+                }
+                //reset view model
+                usersViewModel.setAllUsers(null)
+                usersViewModel.setCurrentUser(null)
+                usersViewModel.setCurrentPicture(null)
+            }
+        })
         setContent {
             EventMapTheme {
                 Surface(
@@ -111,25 +131,15 @@ class MainActivity : ComponentActivity() {
                             )
                         }) {
                         //navhost
-                        Navigation(navController, viewModel, fusedLocationProviderClient, usersViewModel)
+                        Navigation(navController, fusedLocationProviderClient, usersViewModel)
                     }
                 }
             }
         }
     }
+
     private fun getLocationPermission() {
-        if (
-            ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            viewModel.permissionGrand(true)
-        } else {
+        if (!checkIfHasLocationPermission(this)) {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),

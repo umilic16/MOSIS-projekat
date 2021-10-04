@@ -1,15 +1,12 @@
 package com.example.eventmap.presentation.composables
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -19,22 +16,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.focusModifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.eventmap.components.ImageHolder
 import com.example.eventmap.data.User
 import com.example.eventmap.notification.NotificationAdapter.sendNotification
 import com.example.eventmap.notification.NotificationData
 import com.example.eventmap.notification.PushNotification
 import com.example.eventmap.presentation.theme.ui.*
-import com.example.eventmap.presentation.utils.addUsersListener
-import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.utils.*
 
@@ -43,7 +33,7 @@ const val TOPIC = "/topics/myTopic"
 @Composable
 fun Home(navController: NavController, viewModel: UsersViewModel) {
     //Log.d("LogDebug",navController.previousBackStackEntry.toString())
-    val users = viewModel.data.value
+    val users = viewModel.allUsers.value
     val currentUser = viewModel.currentUser.value
     //baca exception da je current user null
     if(currentUser!= null) {
@@ -61,9 +51,11 @@ fun Home(navController: NavController, viewModel: UsersViewModel) {
                     .shadow(elevation = 5.dp)
             ) {
                 //Log.d("HelpMe", "USERS: $users\nCURRENT: $currentUser")
-                items(items = users) { user ->
-                    if (user.userId != currentUser.userId)
-                        UserLazyColumn(user = user, currentUser = currentUser)
+                users?.let{
+                    items(items = it) { user ->
+                        if (user.userId != currentUser.userId)
+                            UserLazyColumn(user = user, currentUser = currentUser)
+                    }
                 }
             }
         }
@@ -211,25 +203,25 @@ fun acceptFriend(currentUser: User, newFriend: User){
         //obrisi iz baze
         removeRequestsFromDatabase(newFriend = newFriend)
         addFriendToDatabase(newFriend = newFriend)
-        /*val nameOrMail = if (currentUser.username.isNullOrEmpty()) {
+        val nameOrMail = if (currentUser.username.isNullOrEmpty()) {
             currentUser.email
         } else {
             currentUser.username
         }
-        val recipient = newFriend.token
-        if (recipient != null) {
+        val recipientToken = newFriend.token
+        if (recipientToken != null) {
             //napravi push notifikaciju
             PushNotification(
                 NotificationData(
                     "New friend",
                     "$nameOrMail accepted your request"
                 ),
-                recipient
+                recipientToken
             ).also {
                 //posalji
                 sendNotification(it)
             }
-        }*/
+        }
     } catch (e: Exception) {
         Log.d("FReq_Exception", e.message.toString())
     }

@@ -29,7 +29,6 @@ import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.components.ImageHolder
 import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.*
-import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.services.FirebaseService.Companion.token
 import com.example.eventmap.utils.saveUser
@@ -178,9 +177,10 @@ fun Register(navController: NavController, viewModel: UsersViewModel) {
                                     saveUser(
                                         user, imageUri!!
                                     )
-                                    viewModel.setCurrentUser(user)
+                                    //viewModel.setCurrentUser(user)
                                     viewModel.setCurrentPicture(bitmap = bitmap.value)
-                                    setCurrentPicture(viewModel)
+                                    viewModel.setLoggedIn(true)
+                                    //setCurrentPicture(viewModel)
                                     //Log.d("LogDebug", navController.graph.startDestinationRoute.toString())
                                     navController.popBackStack("Login", true)
                                     navController.navigate("Home")

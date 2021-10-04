@@ -1,6 +1,5 @@
 package com.example.eventmap.presentation.composables
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,16 +15,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
-import com.example.eventmap.utils.Constants.USERS_DB
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
 
 @Composable
 fun Leaderboard(navController: NavController, viewModel: UsersViewModel) {
-    val sortedUsers = viewModel.data.value.sortedByDescending { it.points }
+    val sortedUsers = viewModel.allUsers.value?.sortedByDescending { it.points }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -40,8 +35,10 @@ fun Leaderboard(navController: NavController, viewModel: UsersViewModel) {
                 .clip(RoundedCornerShape(5.dp))
                 .shadow(elevation = 5.dp)
         ) {
-            itemsIndexed(items = sortedUsers) { i, user ->
-                LeaderboardItem(i + 1, user.email, user.points)
+            sortedUsers?.let{
+                itemsIndexed(items = it) { i, user ->
+                    LeaderboardItem(i + 1, user.email, user.points)
+                }
             }
         }
     }

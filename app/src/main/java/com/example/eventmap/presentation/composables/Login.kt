@@ -21,7 +21,6 @@ import androidx.navigation.NavController
 import com.example.eventmap.R
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.presentation.theme.ui.*
-import com.example.eventmap.presentation.viewmodels.MainActivityViewModel
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.utils.setCurrentPicture
 import com.example.eventmap.utils.setCurrentUser
@@ -112,8 +111,9 @@ fun Login(navController: NavController, viewModel: UsersViewModel) {
                         } else {
                             auth.signInWithEmailAndPassword(email.value, password.value)
                                 .addOnSuccessListener {
-                                    setCurrentUser(viewModel = viewModel)
-                                    setCurrentPicture(viewModel = viewModel)
+                                    //setCurrentUser(viewModel = viewModel)
+                                    //setCurrentPicture(viewModel = viewModel)
+                                    viewModel.setLoggedIn(true)
                                     navController.popBackStack("Login", true)
                                     navController.navigate("Home")
                                 }
