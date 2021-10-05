@@ -1,6 +1,7 @@
 package com.example.eventmap.presentation.composables
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,10 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.eventmap.R
 import com.example.eventmap.data.User
 import com.example.eventmap.notification.NotificationAdapter.sendNotification
 import com.example.eventmap.notification.NotificationData
@@ -36,7 +40,7 @@ fun Home(navController: NavController, viewModel: UsersViewModel) {
     val users = viewModel.allUsers.value
     val currentUser = viewModel.currentUser.value
     //baca exception da je current user null
-    if(currentUser!= null) {
+    //if(currentUser!= null) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -46,20 +50,17 @@ fun Home(navController: NavController, viewModel: UsersViewModel) {
                 .padding(PaddingMedium)
         ) {
             LazyColumn(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(5.dp))
-                    .shadow(elevation = 5.dp)
+                verticalArrangement = Arrangement.spacedBy(PaddingLarge)
             ) {
                 //Log.d("HelpMe", "USERS: $users\nCURRENT: $currentUser")
                 users?.let{
                     items(items = it) { user ->
-                        if (user.userId != currentUser.userId)
-                            UserLazyColumn(user = user, currentUser = currentUser)
+                        if (user.userId != currentUser!!.userId)
+                            UserLazyColumn(user = user, currentUser = currentUser!!)
                     }
                 }
             }
         }
-    }
 }
 
 @Composable
@@ -68,17 +69,17 @@ fun UserLazyColumn(user: User, currentUser: User){
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .background(DefaultWhite)
             .fillMaxWidth()
             .clip(RoundedCornerShape(5.dp))
-            .padding(PaddingSmall)
+            .shadow(elevation = 10.dp)
+            .background(DefaultWhite)
+            .padding(3.dp)
     ){
         //prvi red slika
         //ImageHolder(bitmap = picture.asImageBitmap(), modifier = Modifier.size(50.dp))
         //username i info add friend
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -131,20 +132,23 @@ fun UserLazyColumn(user: User, currentUser: User){
                         Text(
                             text = "Friend",
                             color = DefaultBlue,
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.W500,
                         )
                     } else if(
                         checkIfRequestSent(currentUser,user.userId)) {
                         Text(
                             text = "Request sent!",
                             color = DefaultBlue,
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.W500,
                         )
                     }else if(checkIfRequestReceived(currentUser,user.userId)) {
                         Text(
                             text = "Accept",
                             color = DarkBlue,
                             fontSize = 14.sp,
+                            fontWeight = FontWeight.W500,
                             modifier = Modifier.clickable {
                                 acceptFriend(currentUser = currentUser, newFriend = user)
                             }
@@ -156,11 +160,14 @@ fun UserLazyColumn(user: User, currentUser: User){
                             contentDescription = null,
                             tint = DarkBlue,
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(22.dp)
                                 .clickable {
-                                //send request
-                                sendFriendRequest(currentUser = currentUser, sendingToUser = user)
-                            }
+                                    //send request
+                                    sendFriendRequest(
+                                        currentUser = currentUser,
+                                        sendingToUser = user
+                                    )
+                                }
                         )
                     }
                 }

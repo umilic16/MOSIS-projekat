@@ -32,7 +32,6 @@ import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.services.FirebaseService.Companion.token
 import com.example.eventmap.utils.saveUser
-import com.example.eventmap.utils.setCurrentPicture
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -47,7 +46,7 @@ fun Register(navController: NavController, viewModel: UsersViewModel) {
 
     //slika
     var imageUri by remember { mutableStateOf<Uri?>(null) }
-    val bitmap = remember { mutableStateOf<Bitmap>(BitmapFactory.decodeResource(context.resources, R.drawable.profile2_white)) }
+    val bitmap = remember { mutableStateOf<Bitmap>(BitmapFactory.decodeResource(context.resources, R.drawable.profile_circle)) }
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
         //zbog ispitivanja uslova
         imageUri=uri
@@ -228,7 +227,7 @@ fun Register(navController: NavController, viewModel: UsersViewModel) {
 fun ImageContainer() {
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
-    val bitmap = remember { mutableStateOf<Bitmap?>(BitmapFactory.decodeResource(context.resources, R.drawable.profile2_white)) }
+    val bitmap = remember { mutableStateOf<Bitmap?>(BitmapFactory.decodeResource(context.resources, R.drawable.profile_circle)) }
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
         //zbog ispitivanja uslova
         imageUri=uri

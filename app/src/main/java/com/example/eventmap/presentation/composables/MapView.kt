@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
+import com.example.eventmap.presentation.MainActivity.Companion.fusedLocationProviderClient
 import com.example.eventmap.presentation.utils.rememberMapViewLifecycle
-import com.google.android.gms.location.FusedLocationProviderClient
+import com.example.eventmap.utils.LocationUtil.hasLocationPermissions
+import com.example.eventmap.utils.LocationUtil.isGpsEnabled
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.model.BitmapDescriptorFactory
@@ -22,47 +25,40 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
 @Composable
-fun MapView(navController: NavController, fusedLocationProviderClient: FusedLocationProviderClient) {
+fun MapView(navController: NavController) {
+    val context = LocalContext.current
     val mapView = rememberMapViewLifecycle()
+    if(isGpsEnabled(context)){
+
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView({ mapView }) {
             CoroutineScope(Dispatchers.Main).launch {
                 val map = mapView.awaitMap()
-                map.isMyLocationEnabled = true
-                fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude,it.longitude),12f))
+                if (!hasLocationPermissions(context)) {
+
+                }else if(!isGpsEnabled(context)) {
+                }else{
+                    map.isMyLocationEnabled = true
+                    fusedLocationProviderClient.lastLocation.addOnSuccessListener {
+                        map.moveCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(
+                                    it.latitude,
+                                    it.longitude
+                                ), 12f
+                            )
+                        )
+                    }
+                    //markUsers(map, viewModel)
+                    //markEvents(map,viewModel)
+                    //
                 }
-                //markUsers(map, viewModel)
-                //markEvents(map,viewModel)
-                //
             }
         }
     }
     //
 }
-
-/*fun getCurrentLocation(viewModel: MainActivityViewModel, fusedLocationProviderClient: FusedLocationProviderClient) {
-    val auth = FirebaseAuth.getInstance()
-    try {
-        if (viewModel.locationPermissionGranted.value == true) {
-            val task = fusedLocationProviderClient.lastLocation
-            Log.d("Location_Result", task.toString())
-            task.addOnSuccessListener {
-                if (it != null) {
-                    //Log.d("Location_Result", it.toString())
-                    viewModel.currentUserGeoCoord(
-                        LatLng(it.latitude, it.longitude)
-                    )
-                    //upisi lokaciju u bazu
-                    updateLocation(auth.currentUser?.uid.toString(),  GeoPoint(it.latitude, it.longitude))
-                }
-            }
-        }
-    } catch (e: SecurityException) {
-        Log.d("Exception", "Exception:  $e.message")
-
-    }
-}*/
 
 /*fun markUsers(map: GoogleMap, viewModel: MainActivityViewModel){
     FirebaseFirestore.getInstance().collection("Users").get().addOnSuccessListener {

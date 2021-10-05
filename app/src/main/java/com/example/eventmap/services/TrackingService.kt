@@ -1,11 +1,13 @@
 package com.example.eventmap.services
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
+import android.content.IntentSender
 import android.os.Build
 import android.os.Looper
 import android.util.Log
@@ -13,24 +15,21 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import com.example.eventmap.R
 import com.example.eventmap.presentation.MainActivity
-import com.example.eventmap.presentation.viewmodels.UsersViewModel
+import com.example.eventmap.presentation.MainActivity.Companion.fusedLocationProviderClient
 import com.example.eventmap.utils.Constants.ACTION_PAUSE_SERVICE
 import com.example.eventmap.utils.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.eventmap.utils.Constants.ACTION_STOP_SERVICE
 import com.example.eventmap.utils.Constants.FASTEST_LOCATION_INTERVAL
 import com.example.eventmap.utils.Constants.LOCATION_UPDATE_INTERVAL
 import com.example.eventmap.utils.Constants.NOTIFICATION_ID
-import com.example.eventmap.utils.checkIfHasLocationPermission
-import com.example.eventmap.utils.checkIfLoggedIn
+import com.example.eventmap.utils.LocationUtil.hasLocationPermissions
 import com.example.eventmap.utils.updateLocation
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
-import com.google.android.gms.location.LocationResult
+import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.GeoPoint
 
 private const val CHANNEL_ID = "tracking_channel"
@@ -39,7 +38,6 @@ class TrackingService(): LifecycleService(){
 
     private var isFirstRun = true
     private var serviceKilled = false
-    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var curNotification: NotificationCompat.Builder
 
     companion object{
@@ -57,8 +55,6 @@ class TrackingService(): LifecycleService(){
         //notification "na default"
         curNotification = getDefaultNotificationBuilder()
         postInitialValues()
-        fusedLocationProviderClient = FusedLocationProviderClient(this)
-
         isTracking.observe(this, {
             updateNotificationTrackingState(it)
             updateLocationTracking(it)
@@ -81,7 +77,7 @@ class TrackingService(): LifecycleService(){
                         serviceKilled = false
                     }else{
                         isTracking.postValue(true)
-                       //Log.d("Service_Debug", "Resuming service")
+                        //Log.d("Service_Debug", "Resuming service")
                     }
                 }
                 ACTION_PAUSE_SERVICE -> {
@@ -98,9 +94,11 @@ class TrackingService(): LifecycleService(){
         return super.onStartCommand(intent, flags, startId)
     }
 
+    @SuppressLint("MissingPermission")
     private fun updateLocationTracking(isTracking: Boolean){
+        Log.d("Service_Debug", "Pozvan")
         if(isTracking) {
-            if (checkIfHasLocationPermission(this)){
+            if (hasLocationPermissions(this)){
                 val request = LocationRequest().apply {
                     interval = LOCATION_UPDATE_INTERVAL
                     fastestInterval = FASTEST_LOCATION_INTERVAL
@@ -124,7 +122,7 @@ class TrackingService(): LifecycleService(){
                 result.locations.let{ locations->
                     for(newLocation in locations){
                         location.postValue(GeoPoint(newLocation.latitude,newLocation.longitude))
-                        //Log.d("Service_Debug", location.value.toString())
+                        Log.d("Service_Debug", location.value.toString())
                     }
                 }
             }
@@ -189,7 +187,8 @@ class TrackingService(): LifecycleService(){
         }
         //nova notifikacija u zavisnosti dal je resume il pause
         if(!serviceKilled) {
-            curNotification = getDefaultNotificationBuilder().addAction(R.drawable.ic_baseline_pause_blue_24, notificationActionText, pendingIntent)
+            curNotification = getDefaultNotificationBuilder()
+                .addAction(R.drawable.ic_baseline_pause_blue_24, notificationActionText, pendingIntent)
             notificationManager.notify(NOTIFICATION_ID, curNotification.build())
         }
     }

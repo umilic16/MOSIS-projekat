@@ -1,8 +1,14 @@
 package com.example.eventmap.presentation
 import android.Manifest
-import android.content.Context
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.IntentSender
+import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,9 +20,10 @@ import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.core.app.ActivityCompat
-import androidx.lifecycle.Observer
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.eventmap.components.BottomNavBar
@@ -27,28 +34,35 @@ import com.example.eventmap.presentation.utils.addUsersListener
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.services.FirebaseService.Companion.sharedPref
 import com.example.eventmap.services.FirebaseService.Companion.token
-import com.example.eventmap.services.TrackingService
 import com.example.eventmap.utils.*
-import com.example.eventmap.utils.Constants.ACTION_START_OR_RESUME_SERVICE
-import com.example.eventmap.utils.Constants.ACTION_STOP_SERVICE
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import com.google.firebase.auth.FirebaseAuth
+import com.example.eventmap.utils.Constants.LOCATION_PERMISSION_REQUEST_CODE
+import com.example.eventmap.utils.LocationUtil.hasLocationPermissions
+import com.example.eventmap.utils.LocationUtil.isGpsEnabled
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.Task
 import com.google.firebase.messaging.FirebaseMessaging
+import pub.devrel.easypermissions.AppSettingsDialog
+import pub.devrel.easypermissions.EasyPermissions
+import android.R
+import java.lang.Exception
 
-class MainActivity : ComponentActivity() {
+
+class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     private val usersViewModel by viewModels<UsersViewModel>()
     private var isFirstStart = true
-    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    companion object{
+        lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //FirebaseAuth.getInstance().signOut()
-        //cloud messaging
-        sharedPref = getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
+        sharedPref = getSharedPreferences("sharedPref", MODE_PRIVATE)
         FirebaseMessaging.getInstance().token.addOnSuccessListener {
             token = it
         }
-        getLocationPermission()
+        requestPermissions()
         //fused api za lokaciju
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         //initial value
@@ -131,20 +145,83 @@ class MainActivity : ComponentActivity() {
                             )
                         }) {
                         //navhost
-                        Navigation(navController, fusedLocationProviderClient, usersViewModel)
+                        Navigation(navController, usersViewModel)
                     }
                 }
             }
         }
     }
-
-    private fun getLocationPermission() {
-        if (!checkIfHasLocationPermission(this)) {
-            ActivityCompat.requestPermissions(
+    private fun requestPermissions() {
+        if (hasLocationPermissions(this)) {
+            return
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            EasyPermissions.requestPermissions(
                 this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                101
+                "You need to accept location permission to use this app",
+                LOCATION_PERMISSION_REQUEST_CODE,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        } else {
+            EasyPermissions.requestPermissions(
+                this,
+                "You need to accept location permissions to use this app",
+                LOCATION_PERMISSION_REQUEST_CODE,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                //Manifest.permission.ACCESS_BACKGROUND_LOCATION
             )
         }
     }
+    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            AppSettingsDialog.Builder(this).build().show()
+        } else {
+            requestPermissions()
+        }
+    }
+
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {}
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+    }
+
+    /*private fun checkGpsNetwork() {
+        val lm = this.getSystemService(LOCATION_SERVICE) as LocationManager
+        var gps_enabled = false
+        var network_enabled = false
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        } catch (ex: Exception) {
+        }
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        } catch (ex: Exception) {
+        }
+
+        if (!gps_enabled && !network_enabled) {
+            // notify user
+            AlertDialog.Builder(this)
+                .setMessage("Gps and network aren't enabled")
+                .setPositiveButton("Open location settings",
+                    DialogInterface.OnClickListener { paramDialogInterface, paramInt ->
+                        this.startActivity(
+                            Intent(
+                                Settings.ACTION_LOCATION_SOURCE_SETTINGS
+                            )
+                        )
+                    })
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+    }*/
 }

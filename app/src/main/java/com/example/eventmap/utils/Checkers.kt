@@ -10,13 +10,6 @@ import com.example.eventmap.data.User
 import com.example.eventmap.services.TrackingService
 import com.google.firebase.auth.FirebaseAuth
 
-fun checkIfHasLocationPermission(context: Context): Boolean{
-    return (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-            &&
-            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-
-}
-
 fun checkIfFriends(currentUser: User, checkingUserId: String): Boolean{
     if(currentUser.friends != null){
         return currentUser.friends.contains(checkingUserId)

@@ -9,6 +9,8 @@ object Constants {
     const val SERVER_KEY = "AAAARwgY7e0:APA91bG0WopywlvO9MR_i7M6S78QGA3AVurN6iaYRqB2QYuxwUEqATfDonGz4Fq4zzv3QNXOL5PUcy5bqOSnTkd44D1J1YZL0Nq0yyprh5wE5I7VqfopucOVgjUSnf1DPhZxdU9X6xjV"
     const val CONTENT_TYPE = "application/json"
 
+    const val LOCATION_PERMISSION_REQUEST_CODE = 123
+
     //action consts
     const val ACTION_START_OR_RESUME_SERVICE = "ACTION_START_OR_RESUME_SERVICE"
     const val ACTION_PAUSE_SERVICE = "ACTION_PAUSE_SERVICE"
