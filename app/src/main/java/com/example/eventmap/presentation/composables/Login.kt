@@ -22,8 +22,6 @@ import com.example.eventmap.R
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
-import com.example.eventmap.utils.setCurrentPicture
-import com.example.eventmap.utils.setCurrentUser
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable

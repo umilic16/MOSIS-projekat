@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -23,15 +24,21 @@ import com.example.eventmap.components.BottomNavBar
 import com.example.eventmap.components.BottomNavItem
 import com.example.eventmap.presentation.theme.ui.EventMapTheme
 import com.example.eventmap.presentation.utils.GpsStatusListener
-import com.example.eventmap.presentation.utils.Navigation
 import com.example.eventmap.presentation.utils.LocationPermissionStatusListener
+import com.example.eventmap.presentation.utils.Navigation
 import com.example.eventmap.presentation.utils.addUsersListener
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.services.FirebaseService.Companion.sharedPref
 import com.example.eventmap.services.FirebaseService.Companion.token
-import com.example.eventmap.utils.*
+import com.example.eventmap.services.TrackingService.Companion.isServiceRunning
+import com.example.eventmap.utils.Checkers.checkIfCanTrackLocation
 import com.example.eventmap.utils.Constants.LOCATION_PERMISSION_REQUEST_CODE
+import com.example.eventmap.utils.DbAdapter.checkIfLoggedIn
+import com.example.eventmap.utils.DbAdapter.setCurrentPicture
+import com.example.eventmap.utils.DbAdapter.setCurrentUser
 import com.example.eventmap.utils.LocationUtil.hasLocationPermissions
+import com.example.eventmap.utils.TrackingCommands.startOrResumeTrackingService
+import com.example.eventmap.utils.TrackingCommands.stopTrackingService
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -50,9 +57,16 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
         lateinit var locationPermissionStatusListener: LocationPermissionStatusListener
     }
 
+
+    //ne garantuje
+    override fun onDestroy() {
+        super.onDestroy()
+        stopTrackingService(this)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("Gps_Debug","Main kreiran")
         sharedPref = getSharedPreferences("sharedPref", MODE_PRIVATE)
         FirebaseMessaging.getInstance().token.addOnSuccessListener {
             token = it
@@ -64,11 +78,14 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
         gpsStatusListener = GpsStatusListener(this)
         locationPermissionStatusListener = LocationPermissionStatusListener(this)
         //tracking service takodje prati promene u statusu gps i permisija
-        //zbog situacija kad je main activity na pause
+        //zbog situacija kad je main activity stopiran
         gpsStatusListener.observe(this,{
             if(checkIfCanTrackLocation(this)){
                 startOrResumeTrackingService(this)
-            }else{
+            }else if(isServiceRunning){
+                //da se ne bi pozvalo stop tracking service 2 puta
+                // jednom ovde jednom u tracking servis observeru
+                isServiceRunning = false
                 stopTrackingService(this)
             }
         })
@@ -76,7 +93,8 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
         locationPermissionStatusListener.observe(this,{
             if(checkIfCanTrackLocation(this)){
                 startOrResumeTrackingService(this)
-            }else{
+            }else if(isServiceRunning){
+                isServiceRunning = false
                 stopTrackingService(this)
             }
         })
@@ -112,7 +130,6 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                 usersViewModel.setCurrentPicture(null)
             }
         })
-        Log.d("Gps_Debug", "Pred set content")
         setContent {
             EventMapTheme {
                 Surface(

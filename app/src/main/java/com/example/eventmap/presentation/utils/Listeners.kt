@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.location.LocationManager
-import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LiveData
 import com.example.eventmap.data.User
@@ -30,10 +29,13 @@ fun addUsersListener(viewModel: UsersViewModel){
             val users = mutableListOf<User>()
             for (document in snapshot.documents) {
                 val user = document.toObject<User>()!!
+                //ako se desila promena u current user setuj current u view modelu
+                //ako ne dodaj u listu svih usera
                 if(user.userId==userId){
                     viewModel.setCurrentUser(user)
+                }else{
+                    users.add(user)
                 }
-                users.add(user)
             }
             //Log.d("Add_Debug", "$users")
             viewModel.setAllUsers(users)

@@ -1,7 +1,6 @@
 package com.example.eventmap.presentation.composables
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,12 +22,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventmap.data.User
-import com.example.eventmap.notification.NotificationAdapter.sendNotification
-import com.example.eventmap.notification.NotificationData
-import com.example.eventmap.notification.PushNotification
 import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
-import com.example.eventmap.utils.*
+import com.example.eventmap.utils.Checkers.checkIfFriends
+import com.example.eventmap.utils.Checkers.checkIfRequestReceived
+import com.example.eventmap.utils.Checkers.checkIfRequestSent
+import com.example.eventmap.utils.FriendRequestsUtil.acceptFriend
+import com.example.eventmap.utils.FriendRequestsUtil.sendFriendRequest
 
 const val TOPIC = "/topics/myTopic"
 
@@ -38,7 +38,6 @@ fun Home(navController: NavController, viewModel: UsersViewModel) {
     //Log.d("LogDebug",navController.previousBackStackEntry.toString())
     val currentUser = viewModel.currentUser.value
     val users = viewModel.allUsers.value
-    users?.removeIf { it.userId == currentUser?.userId }
     //baca exception da je current user null
     //if(currentUser!= null) {
     Column(
@@ -172,64 +171,6 @@ fun UserLazyColumn(user: User, currentUser: User){
                 }
             }
         }
-    }
-}
-
-
-fun sendFriendRequest(currentUser: User, sendingToUser: User) {
-    try {
-        //upisi u bazu
-        addSendRequestToUsers(sendingTo = sendingToUser)
-        val nameOrMail = if (currentUser.username.isNullOrEmpty()) {
-            currentUser.email
-        } else {
-            currentUser.username
-        }
-        val recipientToken = sendingToUser.token
-        if (recipientToken != null) {
-            //napravi push notifikaciju
-            PushNotification(
-                NotificationData(
-                    "Friend request",
-                    "You received a friend request from: $nameOrMail"
-                ),
-                recipientToken
-            ).also {
-                //posalji
-                sendNotification(it)
-            }
-        }
-    } catch (e: Exception) {
-        Log.d("FReq_Exception", e.message.toString())
-    }
-}
-
-fun acceptFriend(currentUser: User, newFriend: User){
-    try {
-        //obrisi iz baze
-        removeRequestsFromDatabase(newFriend = newFriend)
-        addFriendToDatabase(newFriend = newFriend)
-        val nameOrMail = if (currentUser.username.isNullOrEmpty()) {
-            currentUser.email
-        } else {
-            currentUser.username
-        }
-        val recipientToken = newFriend.token
-        if (recipientToken != null) {
-            //napravi push notifikaciju
-            PushNotification(
-                NotificationData(
-                    "New friend",
-                    "$nameOrMail accepted your request"
-                ),
-                recipientToken
-            ).also {
-                //posalji
-                sendNotification(it)
-            }
-        }
-    } catch (e: Exception) {
-        Log.d("FReq_Exception", e.message.toString())
     }
 }
 

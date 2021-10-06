@@ -31,7 +31,7 @@ import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.services.FirebaseService.Companion.token
-import com.example.eventmap.utils.saveUser
+import com.example.eventmap.utils.DbAdapter.saveUser
 import com.google.firebase.auth.FirebaseAuth
 
 

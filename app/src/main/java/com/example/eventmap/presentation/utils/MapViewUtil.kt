@@ -10,6 +10,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.example.eventmap.R
 import com.google.android.libraries.maps.MapView
+import com.google.android.libraries.maps.model.Marker
+
+object MarkersHashMap{
+    var allMarkers: HashMap<String, Marker> = HashMap<String,Marker>()
+}
 
 @Composable
 fun rememberMapViewLifecycle(): MapView{

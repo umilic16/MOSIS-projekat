@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
-import android.content.IntentSender
 import android.os.Build
 import android.os.Looper
 import android.util.Log
@@ -20,23 +19,19 @@ import com.example.eventmap.presentation.MainActivity
 import com.example.eventmap.presentation.MainActivity.Companion.fusedLocationProviderClient
 import com.example.eventmap.presentation.MainActivity.Companion.gpsStatusListener
 import com.example.eventmap.presentation.MainActivity.Companion.locationPermissionStatusListener
-import com.example.eventmap.presentation.utils.GpsStatusListener
-import com.example.eventmap.presentation.utils.LocationPermissionStatusListener
 import com.example.eventmap.utils.Constants.ACTION_PAUSE_SERVICE
 import com.example.eventmap.utils.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.eventmap.utils.Constants.ACTION_STOP_SERVICE
 import com.example.eventmap.utils.Constants.FASTEST_LOCATION_INTERVAL
 import com.example.eventmap.utils.Constants.LOCATION_UPDATE_INTERVAL
 import com.example.eventmap.utils.Constants.NOTIFICATION_ID
+import com.example.eventmap.utils.DbAdapter.updateLocation
 import com.example.eventmap.utils.LocationUtil.hasLocationPermissions
-import com.example.eventmap.utils.checkIfCanTrackLocation
-import com.example.eventmap.utils.startOrResumeTrackingService
-import com.example.eventmap.utils.stopTrackingService
-import com.example.eventmap.utils.updateLocation
-import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.*
+import com.example.eventmap.utils.TrackingCommands.stopTrackingService
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
-import com.google.android.gms.tasks.Task
+import com.google.android.gms.location.LocationResult
 import com.google.firebase.firestore.GeoPoint
 
 private const val CHANNEL_ID = "tracking_channel"
@@ -50,6 +45,7 @@ class TrackingService(): LifecycleService(){
     companion object{
         val isTracking = MutableLiveData<Boolean>()
         val location = MutableLiveData<GeoPoint>()
+        var isServiceRunning = false
     }
 
     private fun postInitialValues(){
@@ -58,8 +54,8 @@ class TrackingService(): LifecycleService(){
     }
 
     override fun onCreate() {
-        Log.d("Gps_Debug", "Servis kreiran")
         super.onCreate()
+        //Log.d("Gps_Debug", "Servis kreiran")
         //notification "na default"
         curNotification = getDefaultNotificationBuilder()
         postInitialValues()
@@ -71,14 +67,15 @@ class TrackingService(): LifecycleService(){
             //upisi promene u bazu
             updateLocation(it)
         })
+        //gps status observer
         gpsStatusListener.observe(this,{
-            if(!it){
+            if(!it && isServiceRunning){
                 stopTrackingService(this)
             }
         })
         //location permission observer
         locationPermissionStatusListener.observe(this,{
-            if(!it){
+            if(!it && isServiceRunning){
                 stopTrackingService(this)
             }
         })
@@ -88,6 +85,7 @@ class TrackingService(): LifecycleService(){
         intent?.let{
             when(it.action) {
                 ACTION_START_OR_RESUME_SERVICE -> {
+                    isServiceRunning = true
                     if(isFirstRun){
                         startForegroundService()
                         isFirstRun = false
@@ -165,6 +163,7 @@ class TrackingService(): LifecycleService(){
     private fun killService() {
         serviceKilled = true
         isFirstRun = true
+        isServiceRunning = false
         pauseService()
         postInitialValues()
         stopForeground(true)

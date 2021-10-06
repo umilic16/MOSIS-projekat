@@ -15,12 +15,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 
 @Composable
 fun Leaderboard(navController: NavController, viewModel: UsersViewModel) {
-    val sortedUsers = viewModel.allUsers.value?.sortedByDescending { it.points }
+    val allUsers = viewModel.allUsers.value?.add(viewModel.currentUser.value!!) as List<User>
+    val sortedUsers = allUsers.sortedByDescending { it.points }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,

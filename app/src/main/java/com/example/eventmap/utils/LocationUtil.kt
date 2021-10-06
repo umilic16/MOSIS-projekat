@@ -16,7 +16,6 @@ import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.GeoPoint
 import java.lang.Exception
 
-
 object LocationUtil {
     fun hasLocationPermissions(context: Context) =
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -33,6 +32,7 @@ object LocationUtil {
                 //Manifest.permission.ACCESS_BACKGROUND_LOCATION
             )
         }
+
     fun isGpsEnabled(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager

@@ -11,14 +11,19 @@ import com.example.eventmap.services.TrackingService
 import com.example.eventmap.utils.LocationUtil.hasLocationPermissions
 import com.example.eventmap.utils.LocationUtil.isGpsEnabled
 import com.google.firebase.auth.FirebaseAuth
+object Checkers {
+    fun checkIfCanTrackLocation(context: Context) =
+        hasLocationPermissions(context) && isGpsEnabled(context)
 
-fun checkIfCanTrackLocation(context: Context) = hasLocationPermissions(context) && isGpsEnabled(context)
+    fun checkIfFriends(currentUser: User, checkingUserId: String) =
+        currentUser.friends?.contains(checkingUserId) as Boolean
 
-fun checkIfFriends(currentUser: User, checkingUserId: String) = currentUser.friends?.contains(checkingUserId) as Boolean
+    fun checkIfRequestSent(currentUser: User, checkingUserId: String) =
+        currentUser.sentRequests?.contains(checkingUserId) as Boolean
 
-fun checkIfRequestSent(currentUser: User, checkingUserId: String) = currentUser.sentRequests?.contains(checkingUserId) as Boolean
-
-fun checkIfRequestReceived(currentUser: User, checkingUserId: String) = currentUser.receivedRequests?.contains(checkingUserId) as Boolean
+    fun checkIfRequestReceived(currentUser: User, checkingUserId: String) =
+        currentUser.receivedRequests?.contains(checkingUserId) as Boolean
+}
 
 /*fun checkIfRequestSent(currentUser: User, checkingUserId: String): Boolean{
     if(currentUser.sentRequests != null){

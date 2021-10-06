@@ -21,8 +21,7 @@ import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.data.Event
 import com.example.eventmap.presentation.MainActivity.Companion.fusedLocationProviderClient
 import com.example.eventmap.presentation.theme.ui.*
-import com.example.eventmap.utils.saveEvent
-import com.google.android.gms.location.FusedLocationProviderClient
+import com.example.eventmap.utils.DbAdapter.saveEvent
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.GeoPoint
 

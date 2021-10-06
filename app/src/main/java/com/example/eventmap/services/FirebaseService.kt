@@ -4,7 +4,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.PendingIntent
-import android.app.PendingIntent.FLAG_ONE_SHOT
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
@@ -16,8 +15,8 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.eventmap.R
 import com.example.eventmap.presentation.MainActivity
-import com.example.eventmap.utils.checkIfLoggedIn
-import com.example.eventmap.utils.updateToken
+import com.example.eventmap.utils.DbAdapter.checkIfLoggedIn
+import com.example.eventmap.utils.DbAdapter.updateToken
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import kotlin.random.Random
