@@ -9,8 +9,8 @@ import com.example.eventmap.data.User
 import com.google.firebase.firestore.ListenerRegistration
 
 class UsersViewModel: ViewModel() {
-    private var _allUsers = mutableStateOf(null) as MutableState<List<User>?>
-    val allUsers: MutableState<List<User>?> = _allUsers
+    private var _allUsers = mutableStateOf(null) as MutableState<MutableList<User>?>
+    val allUsers: MutableState<MutableList<User>?> = _allUsers
 
     private var _listenerRegistration = mutableStateOf(null) as MutableState<ListenerRegistration>
     var listenerRegistration: MutableState<ListenerRegistration> = _listenerRegistration
@@ -37,7 +37,7 @@ class UsersViewModel: ViewModel() {
         _currentUser.value = user
     }
 
-    fun setAllUsers(users: List<User>?) {
+    fun setAllUsers(users: MutableList<User>?) {
         _allUsers.value = users
     }
 

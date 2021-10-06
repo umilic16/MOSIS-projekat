@@ -69,23 +69,18 @@ class TrackingService(): LifecycleService(){
         intent?.let{
             when(it.action) {
                 ACTION_START_OR_RESUME_SERVICE -> {
-                    //Log.d("Service_Debug", "Received start service action")
                     if(isFirstRun){
-                        //Log.d("Service_Debug", "Started service")
                         startForegroundService()
                         isFirstRun = false
                         serviceKilled = false
                     }else{
                         isTracking.postValue(true)
-                        //Log.d("Service_Debug", "Resuming service")
                     }
                 }
                 ACTION_PAUSE_SERVICE -> {
-                    //Log.d("Service_Debug", "Paused service")
                     pauseService()
                 }
                 ACTION_STOP_SERVICE -> {
-                    //Log.d("Service_Debug", "Stopped service")
                     killService()
                 }
                 else -> {}
@@ -96,7 +91,6 @@ class TrackingService(): LifecycleService(){
 
     @SuppressLint("MissingPermission")
     private fun updateLocationTracking(isTracking: Boolean){
-        Log.d("Service_Debug", "Pozvan")
         if(isTracking) {
             if (hasLocationPermissions(this)){
                 val request = LocationRequest().apply {
@@ -122,7 +116,7 @@ class TrackingService(): LifecycleService(){
                 result.locations.let{ locations->
                     for(newLocation in locations){
                         location.postValue(GeoPoint(newLocation.latitude,newLocation.longitude))
-                        Log.d("Service_Debug", location.value.toString())
+                        //Log.d("Service_Debug", location.value.toString())
                     }
                 }
             }
@@ -130,7 +124,6 @@ class TrackingService(): LifecycleService(){
     }
 
     private fun startForegroundService(){
-        //Log.d("Service_Debug", "Tracking service started")
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(notificationManager = notificationManager)
@@ -161,8 +154,6 @@ class TrackingService(): LifecycleService(){
 
     private fun pauseService() {
         isTracking.postValue(false)
-        //set location na null da observer detektuje promenu i upise u bazu
-        //pa samim tim prijatelji koji observe bazu videce null odnosno ne znaju lokaciju
         location.postValue(null)
     }
 

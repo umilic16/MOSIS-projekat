@@ -1,15 +1,12 @@
 package com.example.eventmap.presentation
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentSender
-import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -20,16 +17,15 @@ import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.MutableLiveData
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.eventmap.components.BottomNavBar
 import com.example.eventmap.components.BottomNavItem
 import com.example.eventmap.presentation.theme.ui.EventMapTheme
+import com.example.eventmap.presentation.utils.GpsStatusListener
 import com.example.eventmap.presentation.utils.Navigation
+import com.example.eventmap.presentation.utils.PermissionStatusListener
 import com.example.eventmap.presentation.utils.addUsersListener
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.services.FirebaseService.Companion.sharedPref
@@ -37,7 +33,6 @@ import com.example.eventmap.services.FirebaseService.Companion.token
 import com.example.eventmap.utils.*
 import com.example.eventmap.utils.Constants.LOCATION_PERMISSION_REQUEST_CODE
 import com.example.eventmap.utils.LocationUtil.hasLocationPermissions
-import com.example.eventmap.utils.LocationUtil.isGpsEnabled
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -45,8 +40,6 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.messaging.FirebaseMessaging
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
-import android.R
-import java.lang.Exception
 
 
 class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
@@ -55,6 +48,21 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     companion object{
         lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     }
+    /*override fun onPause() {
+        super.onPause()
+        Log.d("Act_Debug", "Pausing main")
+    }*/
+    /*override fun onResume() {
+        super.onResume()
+        //user ne moze da iskljuci permisije za lokaciju bez da se pozove onPause
+        //pa se u onResume proveravaju permisije opet
+        requestPermissions()
+        Log.d("Act_Debug", "Resuming main")
+    }*/
+    /*override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        Log.d("Act_Debug", "Main activity has focus: $hasFocus")
+    }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,18 +73,40 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
         requestPermissions()
         //fused api za lokaciju
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+        //gps observer
+        GpsStatusListener(this).observe(this,{
+            if(checkIfCanTrackLocation(this)){
+                startOrResumeTrackingService(this)
+            }else{
+                stopTrackingService(this)
+            }
+        })
+        //location permission observer
+        PermissionStatusListener(this).observe(this,{
+            if(checkIfCanTrackLocation(this)){
+                startOrResumeTrackingService(this)
+            }else{
+                stopTrackingService(this)
+            }
+        })
         //initial value
         usersViewModel.loggedIn.postValue(checkIfLoggedIn())
         usersViewModel.loggedIn.observe(this, { isLoggedIn ->
-            //Log.d("Login_Debug", "User logged in: $isLoggedIn")
             if(isLoggedIn){
+                //google prompt za lokaciju
+                showLocationPrompt()
+                if(checkIfCanTrackLocation(this)){
+                    startOrResumeTrackingService(this)
+                }else {
+                    Toast.makeText(this,"Can't track your location!", Toast.LENGTH_SHORT)
+                }
+                //dijalog da se ukljuci lokacija
                 //procedura nakon logovanja
                 setCurrentUser(usersViewModel)
                 //register je sam postavlja jer je vec ucitao
                 if(usersViewModel.picture != null){
                     setCurrentPicture(usersViewModel)
                 }
-                startOrResumeTrackingService(this)
                 addUsersListener(usersViewModel)
                 isFirstStart = false
             } else if(!isFirstStart){
@@ -224,4 +254,45 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                 .show()
         }
     }*/
+
+    private fun showLocationPrompt() {
+        val locationRequest = LocationRequest.create()
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+        val result: Task<LocationSettingsResponse> = LocationServices.getSettingsClient(this).checkLocationSettings(builder.build())
+        result.addOnCompleteListener { task ->
+            try {
+                val response = task.getResult(ApiException::class.java)
+            } catch (exception: ApiException) {
+                when (exception.statusCode) {
+                    LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> {
+                        try {
+                            val resolvable: ResolvableApiException = exception as ResolvableApiException
+                            resolvable.startResolutionForResult(
+                                this, LocationRequest.PRIORITY_HIGH_ACCURACY
+                            )
+                        } catch (e: IntentSender.SendIntentException) {
+                            // Ignore the error.
+                        } catch (e: ClassCastException) {
+                            // Ignore, should be an impossible error.
+                        }
+                    }
+                    LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
+                    }
+                }
+            }
+        }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            LocationRequest.PRIORITY_HIGH_ACCURACY -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    Log.e("Status_Debug: ","On")
+                } else {
+                    Log.e("Status_Debug: ","Off")
+                }
+            }
+        }
+    }
 }

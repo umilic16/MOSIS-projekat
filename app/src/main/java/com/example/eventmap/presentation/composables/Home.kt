@@ -1,7 +1,8 @@
 package com.example.eventmap.presentation.composables
 
+import android.os.Build
 import android.util.Log
-import androidx.compose.foundation.Image
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,13 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.eventmap.R
 import com.example.eventmap.data.User
 import com.example.eventmap.notification.NotificationAdapter.sendNotification
 import com.example.eventmap.notification.NotificationData
@@ -34,33 +32,34 @@ import com.example.eventmap.utils.*
 
 const val TOPIC = "/topics/myTopic"
 
+@RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun Home(navController: NavController, viewModel: UsersViewModel) {
     //Log.d("LogDebug",navController.previousBackStackEntry.toString())
-    val users = viewModel.allUsers.value
     val currentUser = viewModel.currentUser.value
+    val users = viewModel.allUsers.value
+    users?.removeIf { it.userId == currentUser?.userId }
     //baca exception da je current user null
     //if(currentUser!= null) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.93f)
-                .padding(PaddingMedium)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.93f)
+            .padding(PaddingMedium)
+    ) {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(PaddingLarge)
         ) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(PaddingLarge)
-            ) {
-                //Log.d("HelpMe", "USERS: $users\nCURRENT: $currentUser")
-                users?.let{
-                    items(items = it) { user ->
-                        if (user.userId != currentUser!!.userId)
-                            UserLazyColumn(user = user, currentUser = currentUser!!)
-                    }
+            //Log.d("HelpMe", "USERS: $users\nCURRENT: $currentUser")
+            users?.let{ allUsers ->
+                items(items = allUsers) { user ->
+                    UserLazyColumn(user = user, currentUser = currentUser!!)
                 }
             }
         }
+    }
 }
 
 @Composable

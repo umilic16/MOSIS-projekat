@@ -45,12 +45,4 @@ object LocationUtil {
             mode != Settings.Secure.LOCATION_MODE_OFF
         }
     }
-
-    /*
-fun isGpsAndNetworkOn(context: Context): Boolean{
-    val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    val gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
-    val network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-    return !gps_enabled && !network_enabled
-}*/
 }

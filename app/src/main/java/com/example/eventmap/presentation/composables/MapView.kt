@@ -1,6 +1,7 @@
 package com.example.eventmap.presentation.composables
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -10,6 +11,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.example.eventmap.presentation.MainActivity.Companion.fusedLocationProviderClient
 import com.example.eventmap.presentation.utils.rememberMapViewLifecycle
+import com.example.eventmap.services.TrackingService.Companion.isTracking
 import com.example.eventmap.utils.LocationUtil.hasLocationPermissions
 import com.example.eventmap.utils.LocationUtil.isGpsEnabled
 import com.google.android.libraries.maps.CameraUpdateFactory
@@ -35,11 +37,22 @@ fun MapView(navController: NavController) {
         AndroidView({ mapView }) {
             CoroutineScope(Dispatchers.Main).launch {
                 val map = mapView.awaitMap()
-                if (!hasLocationPermissions(context)) {
-
-                }else if(!isGpsEnabled(context)) {
-                }else{
+                //map my location trazi permisije bez njih baca exception
+                if(hasLocationPermissions(context)) {
                     map.isMyLocationEnabled = true
+                    map.setOnMyLocationButtonClickListener {
+                    //ako je gps iskljucen iskljuci default ponasanje na button click i prikazi toast
+                        if (!isGpsEnabled(context)) {
+                            Toast.makeText(context, "Turn on gps to see your location", Toast.LENGTH_SHORT).show()
+                            true
+                        }
+                        false
+                    }
+                }else{
+                    Toast.makeText(context, "No permission to see your location", Toast.LENGTH_SHORT).show()
+                }
+                //tracking service is running
+                if(isTracking.value!!){
                     fusedLocationProviderClient.lastLocation.addOnSuccessListener {
                         map.moveCamera(
                             CameraUpdateFactory.newLatLngZoom(

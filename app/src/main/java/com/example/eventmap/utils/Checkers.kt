@@ -8,7 +8,11 @@ import android.net.Uri
 import androidx.core.app.ActivityCompat
 import com.example.eventmap.data.User
 import com.example.eventmap.services.TrackingService
+import com.example.eventmap.utils.LocationUtil.hasLocationPermissions
+import com.example.eventmap.utils.LocationUtil.isGpsEnabled
 import com.google.firebase.auth.FirebaseAuth
+
+fun checkIfCanTrackLocation(context: Context) = hasLocationPermissions(context) && isGpsEnabled(context)
 
 fun checkIfFriends(currentUser: User, checkingUserId: String): Boolean{
     if(currentUser.friends != null){
