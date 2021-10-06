@@ -43,13 +43,13 @@ fun MapView(navController: NavController) {
                     map.setOnMyLocationButtonClickListener {
                     //ako je gps iskljucen iskljuci default ponasanje na button click i prikazi toast
                         if (!isGpsEnabled(context)) {
-                            Toast.makeText(context, "Turn on gps to see your location", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Your gps is turned off!", Toast.LENGTH_SHORT).show()
                             true
                         }
                         false
                     }
                 }else{
-                    Toast.makeText(context, "No permission to see your location", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "No permission to see your location!", Toast.LENGTH_SHORT).show()
                 }
                 //tracking service is running
                 if(isTracking.value!!){

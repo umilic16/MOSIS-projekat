@@ -14,11 +14,11 @@ import com.google.firebase.auth.FirebaseAuth
 
 fun checkIfCanTrackLocation(context: Context) = hasLocationPermissions(context) && isGpsEnabled(context)
 
-fun checkIfFriends(currentUser: User, checkingUserId: String) = currentUser.friends?.contains(checkingUserId)
+fun checkIfFriends(currentUser: User, checkingUserId: String) = currentUser.friends?.contains(checkingUserId) as Boolean
 
-fun checkIfRequestSent(currentUser: User, checkingUserId: String) = currentUser.sentRequests?.contains(checkingUserId)
+fun checkIfRequestSent(currentUser: User, checkingUserId: String) = currentUser.sentRequests?.contains(checkingUserId) as Boolean
 
-fun checkIfRequestReceived(currentUser: User, checkingUserId: String) = currentUser.receivedRequests?.contains(checkingUserId)
+fun checkIfRequestReceived(currentUser: User, checkingUserId: String) = currentUser.receivedRequests?.contains(checkingUserId) as Boolean
 
 /*fun checkIfRequestSent(currentUser: User, checkingUserId: String): Boolean{
     if(currentUser.sentRequests != null){

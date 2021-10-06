@@ -97,8 +97,6 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                 showLocationPrompt()
                 if(checkIfCanTrackLocation(this)){
                     startOrResumeTrackingService(this)
-                }else {
-                    Toast.makeText(this,"Can't track your location!", Toast.LENGTH_SHORT)
                 }
                 //dijalog da se ukljuci lokacija
                 //procedura nakon logovanja
@@ -283,6 +281,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
             }
         }
     }
+    //i nije potrebno
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
