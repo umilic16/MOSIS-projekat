@@ -18,6 +18,10 @@ import androidx.lifecycle.MutableLiveData
 import com.example.eventmap.R
 import com.example.eventmap.presentation.MainActivity
 import com.example.eventmap.presentation.MainActivity.Companion.fusedLocationProviderClient
+import com.example.eventmap.presentation.MainActivity.Companion.gpsStatusListener
+import com.example.eventmap.presentation.MainActivity.Companion.locationPermissionStatusListener
+import com.example.eventmap.presentation.utils.GpsStatusListener
+import com.example.eventmap.presentation.utils.LocationPermissionStatusListener
 import com.example.eventmap.utils.Constants.ACTION_PAUSE_SERVICE
 import com.example.eventmap.utils.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.eventmap.utils.Constants.ACTION_STOP_SERVICE
@@ -25,6 +29,9 @@ import com.example.eventmap.utils.Constants.FASTEST_LOCATION_INTERVAL
 import com.example.eventmap.utils.Constants.LOCATION_UPDATE_INTERVAL
 import com.example.eventmap.utils.Constants.NOTIFICATION_ID
 import com.example.eventmap.utils.LocationUtil.hasLocationPermissions
+import com.example.eventmap.utils.checkIfCanTrackLocation
+import com.example.eventmap.utils.startOrResumeTrackingService
+import com.example.eventmap.utils.stopTrackingService
 import com.example.eventmap.utils.updateLocation
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -51,6 +58,7 @@ class TrackingService(): LifecycleService(){
     }
 
     override fun onCreate() {
+        Log.d("Gps_Debug", "Servis kreiran")
         super.onCreate()
         //notification "na default"
         curNotification = getDefaultNotificationBuilder()
@@ -62,6 +70,17 @@ class TrackingService(): LifecycleService(){
         location.observe(this, {
             //upisi promene u bazu
             updateLocation(it)
+        })
+        gpsStatusListener.observe(this,{
+            if(!it){
+                stopTrackingService(this)
+            }
+        })
+        //location permission observer
+        locationPermissionStatusListener.observe(this,{
+            if(!it){
+                stopTrackingService(this)
+            }
         })
     }
 

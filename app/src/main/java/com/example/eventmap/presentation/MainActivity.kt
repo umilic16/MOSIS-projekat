@@ -6,7 +6,6 @@ import android.content.IntentSender
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -25,7 +24,7 @@ import com.example.eventmap.components.BottomNavItem
 import com.example.eventmap.presentation.theme.ui.EventMapTheme
 import com.example.eventmap.presentation.utils.GpsStatusListener
 import com.example.eventmap.presentation.utils.Navigation
-import com.example.eventmap.presentation.utils.PermissionStatusListener
+import com.example.eventmap.presentation.utils.LocationPermissionStatusListener
 import com.example.eventmap.presentation.utils.addUsersListener
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.services.FirebaseService.Companion.sharedPref
@@ -47,25 +46,13 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     private var isFirstStart = true
     companion object{
         lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+        lateinit var gpsStatusListener: GpsStatusListener
+        lateinit var locationPermissionStatusListener: LocationPermissionStatusListener
     }
-    /*override fun onPause() {
-        super.onPause()
-        Log.d("Act_Debug", "Pausing main")
-    }*/
-    /*override fun onResume() {
-        super.onResume()
-        //user ne moze da iskljuci permisije za lokaciju bez da se pozove onPause
-        //pa se u onResume proveravaju permisije opet
-        requestPermissions()
-        Log.d("Act_Debug", "Resuming main")
-    }*/
-    /*override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        Log.d("Act_Debug", "Main activity has focus: $hasFocus")
-    }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("Gps_Debug","Main kreiran")
         sharedPref = getSharedPreferences("sharedPref", MODE_PRIVATE)
         FirebaseMessaging.getInstance().token.addOnSuccessListener {
             token = it
@@ -74,7 +61,11 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
         //fused api za lokaciju
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         //gps observer
-        GpsStatusListener(this).observe(this,{
+        gpsStatusListener = GpsStatusListener(this)
+        locationPermissionStatusListener = LocationPermissionStatusListener(this)
+        //tracking service takodje prati promene u statusu gps i permisija
+        //zbog situacija kad je main activity na pause
+        gpsStatusListener.observe(this,{
             if(checkIfCanTrackLocation(this)){
                 startOrResumeTrackingService(this)
             }else{
@@ -82,7 +73,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
             }
         })
         //location permission observer
-        PermissionStatusListener(this).observe(this,{
+        locationPermissionStatusListener.observe(this,{
             if(checkIfCanTrackLocation(this)){
                 startOrResumeTrackingService(this)
             }else{
@@ -121,6 +112,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                 usersViewModel.setCurrentPicture(null)
             }
         })
+        Log.d("Gps_Debug", "Pred set content")
         setContent {
             EventMapTheme {
                 Surface(
@@ -220,38 +212,6 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
-
-    /*private fun checkGpsNetwork() {
-        val lm = this.getSystemService(LOCATION_SERVICE) as LocationManager
-        var gps_enabled = false
-        var network_enabled = false
-
-        try {
-            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        } catch (ex: Exception) {
-        }
-
-        try {
-            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-        } catch (ex: Exception) {
-        }
-
-        if (!gps_enabled && !network_enabled) {
-            // notify user
-            AlertDialog.Builder(this)
-                .setMessage("Gps and network aren't enabled")
-                .setPositiveButton("Open location settings",
-                    DialogInterface.OnClickListener { paramDialogInterface, paramInt ->
-                        this.startActivity(
-                            Intent(
-                                Settings.ACTION_LOCATION_SOURCE_SETTINGS
-                            )
-                        )
-                    })
-                .setNegativeButton("Cancel", null)
-                .show()
-        }
-    }*/
 
     private fun showLocationPrompt() {
         val locationRequest = LocationRequest.create()

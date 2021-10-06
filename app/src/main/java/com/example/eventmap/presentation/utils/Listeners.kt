@@ -68,7 +68,7 @@ class GpsStatusListener(private val context: Context) : LiveData<Boolean>() {
     private fun unregisterReceiver() = context.unregisterReceiver(gpsSwitchStateReceiver)
 }
 
-class PermissionStatusListener(private val context: Context) : LiveData<Boolean>() {
+class LocationPermissionStatusListener(private val context: Context) : LiveData<Boolean>() {
 
     override fun onActive() = handlePermissionCheck()
 
