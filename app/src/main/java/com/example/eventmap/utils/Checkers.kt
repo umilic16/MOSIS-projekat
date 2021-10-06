@@ -14,44 +14,27 @@ import com.google.firebase.auth.FirebaseAuth
 
 fun checkIfCanTrackLocation(context: Context) = hasLocationPermissions(context) && isGpsEnabled(context)
 
-fun checkIfFriends(currentUser: User, checkingUserId: String): Boolean{
-    if(currentUser.friends != null){
-        return currentUser.friends.contains(checkingUserId)
-    }
-    return false
-}
+fun checkIfFriends(currentUser: User, checkingUserId: String) = currentUser.friends?.contains(checkingUserId)
 
-fun checkIfRequestSent(currentUser: User, checkingUserId: String): Boolean{
+fun checkIfRequestSent(currentUser: User, checkingUserId: String) = currentUser.sentRequests?.contains(checkingUserId)
+
+fun checkIfRequestReceived(currentUser: User, checkingUserId: String) = currentUser.receivedRequests?.contains(checkingUserId)
+
+/*fun checkIfRequestSent(currentUser: User, checkingUserId: String): Boolean{
     if(currentUser.sentRequests != null){
         return currentUser.sentRequests.contains(checkingUserId)
     }
     return false
-}
-
-fun checkIfRequestReceived(currentUser: User, checkingUserId: String): Boolean{
+}*/
+/*fun checkIfRequestReceived(currentUser: User, checkingUserId: String): Boolean{
     if(currentUser.receivedRequests != null){
         return currentUser.receivedRequests.contains(checkingUserId)
     }
     return false
-}
-
-/*fun addRandomUsers(numOfUsers: Int, lengthOfEmail: Int){
-    for (i in 0..numOfUsers){
-        val email = "${getRandomString(lengthOfEmail)}@gmail.com"
-        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, "test123")
-            .addOnSuccessListener {
-                saveUser(
-                    User(email = email, username = "test123")
-                )
-            }
+}*/
+/*fun checkIfFriends(currentUser: User, checkingUserId: String): Boolean{
+    if(currentUser.friends != null){
+        return currentUser.friends.contains(checkingUserId)
     }
-}
-
-fun getRandomString(length: Int) : String {
-    val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-    return (1..length)
-        .map { allowedChars.random() }
-        .joinToString("")
-}
-
-*/
+    return false
+}*/
