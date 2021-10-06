@@ -30,9 +30,6 @@ import kotlinx.coroutines.launch
 fun MapView(navController: NavController) {
     val context = LocalContext.current
     val mapView = rememberMapViewLifecycle()
-    if(isGpsEnabled(context)){
-
-    }
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView({ mapView }) {
             CoroutineScope(Dispatchers.Main).launch {
@@ -41,10 +38,10 @@ fun MapView(navController: NavController) {
                 if(hasLocationPermissions(context)) {
                     map.isMyLocationEnabled = true
                     map.setOnMyLocationButtonClickListener {
-                    //ako je gps iskljucen iskljuci default ponasanje na button click i prikazi toast
+                        //ako je gps iskljucen iskljuci default ponasanje na button click i prikazi toast
                         if (!isGpsEnabled(context)) {
-                            Toast.makeText(context, "Your gps is turned off!", Toast.LENGTH_SHORT).show()
-                            true
+                            Toast.makeText(context, "Your gps is turned off!", Toast.LENGTH_SHORT)
+                                .show()
                         }
                         false
                     }
@@ -53,24 +50,22 @@ fun MapView(navController: NavController) {
                 }
                 //tracking service is running
                 if(isTracking.value!!){
-                    fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-                        map.moveCamera(
-                            CameraUpdateFactory.newLatLngZoom(
-                                LatLng(
-                                    it.latitude,
-                                    it.longitude
-                                ), 12f
+                    fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
+                        if (location != null) {
+                            map.moveCamera(
+                                CameraUpdateFactory.newLatLngZoom(
+                                    LatLng(
+                                        location.latitude,
+                                        location.longitude
+                                    ), 12f
+                                )
                             )
-                        )
+                        }
                     }
-                    //markUsers(map, viewModel)
-                    //markEvents(map,viewModel)
-                    //
                 }
             }
         }
     }
-    //
 }
 
 /*fun markUsers(map: GoogleMap, viewModel: MainActivityViewModel){
