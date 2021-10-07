@@ -8,6 +8,7 @@ import android.util.Log
 import com.example.eventmap.data.Event
 import com.example.eventmap.data.User
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
+import com.example.eventmap.services.FirebaseService.Companion.token
 import com.example.eventmap.utils.Constants.EVENTS_DB
 import com.example.eventmap.utils.Constants.USERS_DB
 import com.google.firebase.auth.FirebaseAuth
@@ -129,11 +130,16 @@ object DbAdapter {
         try {
             val auth = FirebaseAuth.getInstance()
             val db = FirebaseFirestore.getInstance()
-            val docRef = db.collection(USERS_DB).document(auth.currentUser?.uid.toString())
-            val user = docRef.get().await()
-            viewModel.setCurrentUser(user.toObject<User>()!!)
-            Firebase.storage.reference.child("images/${auth.currentUser?.uid}")
-                .getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
+            val docRef = db.collection(USERS_DB).document(auth.currentUser!!.uid)
+            val result = docRef.get().await()
+            val user = result.toObject<User>()!!
+            //funkcija updateToken se poziva na onNew token
+            //ovde se proverava da li je potreban update na login
+            if(user.token != token){
+                docRef.update("token", token)
+            }
+            viewModel.setCurrentUser(user)
+            //val bytes = Firebase.storage.reference.child("images/${auth.currentUser?.uid}").getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
             //val picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             //viewModel.setCurrentPicture(picture)
         } catch (e: Exception) {

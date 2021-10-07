@@ -2,6 +2,7 @@ package com.example.eventmap.presentation.composables
 
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
@@ -79,7 +80,7 @@ fun markUsers(map: GoogleMap,users: List<User>?){
     users?.let{
         for(user in it){
             //kreiraj hash map za markere
-            user.location?.let {
+            if(user.location != null) {
                 if(allMarkers[user.userId] == null){
                     allMarkers[user.userId] = map.addMarker(markerOptions {
                         this.title(
@@ -89,13 +90,18 @@ fun markUsers(map: GoogleMap,users: List<User>?){
                                 user.username
                             }
                         )
-                        this.position(LatLng(user.location!!.latitude, user.location.longitude))
+                        this.position(LatLng(user.location.latitude, user.location.longitude))
                         this.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)
                         )
                     })
                 }else{
-                    allMarkers[user.userId]!!.position = LatLng(user.location!!.latitude, user.location.longitude)
+                    allMarkers[user.userId]!!.position = LatLng(user.location.latitude, user.location.longitude)
                 }
+                //ako je kreiran marker a lokacija je postala null (ne prati se vise) brisi marker
+            }else {
+                //brisi iz hashmape i google mape
+                allMarkers[user.userId]?.remove()
+                allMarkers.remove(user.userId)
             }
         }
     }

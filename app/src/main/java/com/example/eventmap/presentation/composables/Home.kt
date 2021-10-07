@@ -75,6 +75,7 @@ fun UserLazyColumn(user: User, currentUser: User){
     ){
         //prvi red slika
         //ImageHolder(bitmap = picture.asImageBitmap(), modifier = Modifier.size(50.dp))
+        //ubaci glide da ucitava sliku
         //username i info add friend
         Column(
             modifier = Modifier.fillMaxWidth()

@@ -108,6 +108,7 @@ class TrackingService(): LifecycleService(){
 
     @SuppressLint("MissingPermission")
     private fun updateLocationTracking(isTracking: Boolean){
+        Log.d("Service_Debug", "Update location tracking: isTracking=$isTracking")
         if(isTracking) {
             if (hasLocationPermissions(this)){
                 val request = LocationRequest().apply {
@@ -133,7 +134,7 @@ class TrackingService(): LifecycleService(){
                 result.locations.let{ locations->
                     for(newLocation in locations){
                         location.postValue(GeoPoint(newLocation.latitude,newLocation.longitude))
-                        //Log.d("Service_Debug", location.value.toString())
+                        Log.d("Service_Debug", location.value.toString())
                     }
                 }
             }

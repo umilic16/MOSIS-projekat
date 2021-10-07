@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.eventmap.components.CustomTextField
 import com.example.eventmap.components.ImageHolder
+import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.utils.DbAdapter.updateUsername
@@ -43,13 +45,13 @@ fun AccountView(navController: NavController, viewModel: UsersViewModel) {
             .fillMaxHeight()
             .padding(PaddingMedium)
     ) {
-        Text(
+        /*Text(
             text = "Account Information",
             color = DefaultWhite,
             fontSize = 20.sp,
             modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.padding(PaddingLarge))
+        )*/
+        Spacer(modifier = Modifier.padding(PaddingSmall))
         picture.value?.let {
             ImageHolder(
                 bitmap = it.asImageBitmap(),
@@ -59,52 +61,63 @@ fun AccountView(navController: NavController, viewModel: UsersViewModel) {
             )
         }
         Spacer(modifier = Modifier.padding(PaddingMedium))
-        CustomTextField(
-            text = username.value,
-            onValueChange = { username.value = it },
-            colors = TextFieldDefaults.textFieldColors(
-                textColor = DarkText,
-                backgroundColor = DefaultWhite,
-                placeholderColor = DarkText
-            ),
-            style = TextStyle(
-                fontWeight = FontWeight.W400,
-            ),
-            hint = if (user?.username!!.isNotEmpty()) user.username else "Enter your username",
-        )
-        Spacer(modifier = Modifier.padding(PaddingSmall))
-        CustomTextField(
-            text = user.email,
-            readOnly = true,
-            style = TextStyle(
-                fontWeight = FontWeight.W400,
-            )
-        )
-        Spacer(modifier = Modifier.padding(PaddingSmall))
-        CustomTextField(
-            text = "Friends: ${user.numOfFriends}",
-            readOnly = true,
-            style = TextStyle(
-                fontWeight = FontWeight.W400,
-            )
-        )
-        Spacer(modifier = Modifier.padding(PaddingSmall))
-        CustomTextField(
-            text = "Events: ${user.numOfEvents}",
-            readOnly = true,
-            style = TextStyle(
-                fontWeight = FontWeight.W400,
-            )
-        )
-        Spacer(modifier = Modifier.padding(PaddingSmall))
-        CustomTextField(
-            text = "Points: ${user.points}",
-            readOnly = true,
-            style = TextStyle(
-                fontWeight = FontWeight.W400,
-            )
-        )
-        Spacer(modifier = Modifier.padding(PaddingLarge))
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(PaddingSmall),
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.6f)
+        ){
+            item{
+                CustomTextField(
+                    text = username.value,
+                    onValueChange = { username.value = it },
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = DarkText,
+                        backgroundColor = DefaultWhite,
+                        placeholderColor = DarkText
+                    ),
+                    style = TextStyle(
+                        fontWeight = FontWeight.W400,
+                    ),
+                    hint = if (user?.username!!.isNotEmpty()) user.username else "Enter your username",
+                )
+            }
+            item{
+                CustomTextField(
+                    text = user!!.email,
+                    readOnly = true,
+                    style = TextStyle(
+                        fontWeight = FontWeight.W400,
+                    )
+                )
+            }
+            item{
+                CustomTextField(
+                    text = "Friends: ${user!!.numOfFriends}",
+                    readOnly = true,
+                    style = TextStyle(
+                        fontWeight = FontWeight.W400,
+                    )
+                )
+            }
+            item{
+                CustomTextField(
+                    text = "Events: ${user!!.numOfEvents}",
+                    readOnly = true,
+                    style = TextStyle(
+                        fontWeight = FontWeight.W400,
+                    )
+                )
+            }
+            item{
+                CustomTextField(
+                    text = "Points: ${user!!.points}",
+                    readOnly = true,
+                    style = TextStyle(
+                        fontWeight = FontWeight.W400,
+                    )
+                )
+            }
+        }
+        Spacer(modifier = Modifier.padding(PaddingMedium))
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
@@ -113,7 +126,7 @@ fun AccountView(navController: NavController, viewModel: UsersViewModel) {
             Button(
                 onClick = {
                     if (username.value.isNotEmpty()) {
-                        if (username.value != user.username) {
+                        if (username.value != user!!.username) {
                             updateUsername(username.value)
                             Toast.makeText(
                                 context,
