@@ -23,6 +23,7 @@ object Checkers {
 
     fun checkIfRequestReceived(currentUser: User, checkingUserId: String) =
         currentUser.receivedRequests?.contains(checkingUserId) as Boolean
+
 }
 
 /*fun checkIfRequestSent(currentUser: User, checkingUserId: String): Boolean{

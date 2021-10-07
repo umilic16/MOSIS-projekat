@@ -51,7 +51,8 @@ class FirebaseService: FirebaseMessagingService() {
 
         val intent = Intent(this, MainActivity::class.java)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val notificationId = Random.nextInt()
+        //+3 zbog zauzetih id-eva
+        val notificationId = Random.nextInt() + 3
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(notificationManager = notificationManager)

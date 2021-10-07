@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
+import android.location.Location
 import android.os.Build
 import android.os.Looper
 import android.util.Log
@@ -21,7 +22,11 @@ import com.example.eventmap.utils.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.eventmap.utils.Constants.ACTION_STOP_SERVICE
 import com.example.eventmap.utils.Constants.FASTEST_LOCATION_INTERVAL
 import com.example.eventmap.utils.Constants.LOCATION_UPDATE_INTERVAL
-import com.example.eventmap.utils.Constants.NOTIFICATION_ID
+import com.example.eventmap.utils.Constants.NEARBY_EVENTS_NOTIFICATION_ID
+import com.example.eventmap.utils.Constants.NEARBY_USERS_NOTIFICATION_ID
+import com.example.eventmap.utils.Constants.TRACKING_NOTIFICATION_ID
+import com.example.eventmap.utils.DbAdapter.getNearbyEvents
+import com.example.eventmap.utils.DbAdapter.getNearbyUsers
 import com.example.eventmap.utils.DbAdapter.updateLocation
 import com.example.eventmap.utils.LocationUtil.fusedLocationProviderClient
 import com.example.eventmap.utils.LocationUtil.gpsStatusListener
@@ -33,14 +38,18 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.location.LocationResult
 import com.google.firebase.firestore.GeoPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private const val CHANNEL_ID = "tracking_channel"
 
-class TrackingService(): LifecycleService(){
+class TrackingService() : LifecycleService(){
 
     private var isFirstRun = true
     private var serviceKilled = false
     private lateinit var curNotification: NotificationCompat.Builder
+    private lateinit var notificationManager: NotificationManager
 
     companion object{
         val isTracking = MutableLiveData<Boolean>()
@@ -55,6 +64,7 @@ class TrackingService(): LifecycleService(){
 
     override fun onCreate() {
         super.onCreate()
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         //Log.d("Gps_Debug", "Servis kreiran")
         //notification "na default"
         curNotification = getDefaultNotificationBuilder()
@@ -66,6 +76,9 @@ class TrackingService(): LifecycleService(){
         location.observe(this, {
             //upisi promene u bazu
             updateLocation(it)
+            it?.let{
+                checkNearby(it)
+            }
         })
         //gps status observer
         gpsStatusListener.observe(this,{
@@ -79,6 +92,47 @@ class TrackingService(): LifecycleService(){
                 stopTrackingService(this)
             }
         })
+    }
+
+    private fun checkNearby(location: GeoPoint){
+        val loc = Location("").apply {
+            this.latitude=location.latitude
+            this.longitude=location.longitude
+        }
+        CoroutineScope(Dispatchers.IO).launch {
+            getNearbyUsers(loc).also { users ->
+                //Log.d("Nearby_Debug", "Received list from db: $users")
+                if (users.isNotEmpty()) {
+                    var message = ""
+                    users.forEachIndexed{ index, user ->
+                        message += user.username ?: user.email
+                        if(index < users.size-1){
+                            message += ", "
+                        }
+                    }
+                    val notification = getNearbyNotificationBuilder()
+                        .setContentTitle("Detected users nearby")
+                        .setContentText(message)
+                    notificationManager.notify(NEARBY_USERS_NOTIFICATION_ID, notification.build())
+                }
+            }
+            getNearbyEvents(loc).also { events ->
+                //Log.d("Nearby_Debug", "Received list from db: $users")
+                if (events.isNotEmpty()) {
+                    var message = ""
+                    events.forEachIndexed{ index, event ->
+                        message += event.title
+                        if(index < events.size-1){
+                            message += ", "
+                        }
+                    }
+                    val notification = getNearbyNotificationBuilder()
+                        .setContentTitle("Detected events nearby")
+                        .setContentText(message)
+                    notificationManager.notify(NEARBY_EVENTS_NOTIFICATION_ID, notification.build())
+                }
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -134,7 +188,7 @@ class TrackingService(): LifecycleService(){
                 result.locations.let{ locations->
                     for(newLocation in locations){
                         location.postValue(GeoPoint(newLocation.latitude,newLocation.longitude))
-                        Log.d("Service_Debug", location.value.toString())
+                        //Log.d("Service_Debug", location.value.toString())
                     }
                 }
             }
@@ -142,15 +196,15 @@ class TrackingService(): LifecycleService(){
     }
 
     private fun startForegroundService(){
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        //val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(notificationManager = notificationManager)
         }
         isTracking.postValue(true)
-        startForeground(NOTIFICATION_ID, curNotification.build())
+        startForeground(TRACKING_NOTIFICATION_ID, curNotification.build())
         if(!serviceKilled) {
             val notification = curNotification
-            notificationManager.notify(NOTIFICATION_ID, notification.build())
+            notificationManager.notify(TRACKING_NOTIFICATION_ID, notification.build())
         }
     }
 
@@ -189,7 +243,7 @@ class TrackingService(): LifecycleService(){
             }
             PendingIntent.getService(this, 2, resumeIntent, FLAG_UPDATE_CURRENT)
         }
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        //val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         //remove previous action
         curNotification.javaClass.getDeclaredField("mActions").apply {
             isAccessible = true
@@ -199,7 +253,7 @@ class TrackingService(): LifecycleService(){
         if(!serviceKilled) {
             curNotification = getDefaultNotificationBuilder()
                 .addAction(R.drawable.ic_baseline_pause_blue_24, notificationActionText, pendingIntent)
-            notificationManager.notify(NOTIFICATION_ID, curNotification.build())
+            notificationManager.notify(TRACKING_NOTIFICATION_ID, curNotification.build())
         }
     }
 
@@ -209,6 +263,10 @@ class TrackingService(): LifecycleService(){
         .setSmallIcon(R.drawable.logo)
         .setContentTitle("Event map")
         .setContentText("Tracking service is running")
+        .setContentIntent(getMainActivityPendingIntent())
+
+    private fun getNearbyNotificationBuilder() = NotificationCompat.Builder(this, CHANNEL_ID)
+        .setSmallIcon(R.drawable.logo)
         .setContentIntent(getMainActivityPendingIntent())
 
     private fun getMainActivityPendingIntent() = PendingIntent.getActivity(

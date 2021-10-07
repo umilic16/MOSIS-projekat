@@ -20,5 +20,9 @@ object Constants {
     const val LOCATION_UPDATE_INTERVAL = 5000L
     const val FASTEST_LOCATION_INTERVAL = 2000L
 
-    const val NOTIFICATION_ID = 1
+    const val NEARBY_USERS_NOTIFICATION_ID = 3
+    const val NEARBY_EVENTS_NOTIFICATION_ID = 2
+    const val TRACKING_NOTIFICATION_ID = 1
+
+    const val DISTANCE_FOR_NEARBY_TRACKING = 1000f
 }

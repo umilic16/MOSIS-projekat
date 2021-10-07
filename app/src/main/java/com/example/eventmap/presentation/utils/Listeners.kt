@@ -42,7 +42,6 @@ fun addUsersListener(viewModel: UsersViewModel){
                 }*/
                 viewModel.setAllUsers(users)
             }
-            //Log.d("Add_Debug", "$users")
         } else {
             Log.d("Listener_Debug", "Current data: null")
         }
