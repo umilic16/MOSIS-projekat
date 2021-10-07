@@ -35,7 +35,10 @@ import com.example.eventmap.utils.Constants.LOCATION_PERMISSION_REQUEST_CODE
 import com.example.eventmap.utils.DbAdapter.checkIfLoggedIn
 import com.example.eventmap.utils.DbAdapter.setCurrentPictureUrl
 import com.example.eventmap.utils.DbAdapter.setCurrentUser
+import com.example.eventmap.utils.LocationUtil.fusedLocationProviderClient
+import com.example.eventmap.utils.LocationUtil.gpsStatusListener
 import com.example.eventmap.utils.LocationUtil.hasLocationPermissions
+import com.example.eventmap.utils.LocationUtil.locationPermissionStatusListener
 import com.example.eventmap.utils.TrackingCommands.startOrResumeTrackingService
 import com.example.eventmap.utils.TrackingCommands.stopTrackingService
 import com.google.android.gms.common.api.ApiException
@@ -50,11 +53,7 @@ import pub.devrel.easypermissions.EasyPermissions
 class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     private val usersViewModel by viewModels<UsersViewModel>()
     private var isFirstStart = true
-    companion object{
-        lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-        lateinit var gpsStatusListener: GpsStatusListener
-        lateinit var locationPermissionStatusListener: LocationPermissionStatusListener
-    }
+
     //ne garantuje
     override fun onDestroy() {
         super.onDestroy()
@@ -109,7 +108,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                 //procedura nakon logovanja
                 setCurrentUser(usersViewModel)
                 setCurrentPictureUrl(usersViewModel)
-                addUsersListener(usersViewModel, this)
+                addUsersListener(usersViewModel)
                 //na prvi login se ucitavaju sve slike
                 //setAllPictures(usersViewModel, this)
                 isFirstStart = false

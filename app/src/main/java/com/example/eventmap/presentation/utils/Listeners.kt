@@ -17,7 +17,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 
-fun addUsersListener(viewModel: UsersViewModel, context: Context){
+fun addUsersListener(viewModel: UsersViewModel){
     val userId = FirebaseAuth.getInstance().currentUser?.uid
     val docRef = FirebaseFirestore.getInstance().collection(Constants.USERS_DB)
     viewModel.setListenerRegistration(docRef.addSnapshotListener { snapshot, e ->
@@ -37,9 +37,9 @@ fun addUsersListener(viewModel: UsersViewModel, context: Context){
                 }else{
                     users.add(user)
                 }
-                if(viewModel.allPicturesAsThumbnails.value[user.userId] == null){
+                /*if(viewModel.allPicturesAsThumbnails.value[user.userId] == null){
                     getPictureAndAddToViewModel(viewModel, user.userId, context)
-                }
+                }*/
                 viewModel.setAllUsers(users)
             }
             //Log.d("Add_Debug", "$users")

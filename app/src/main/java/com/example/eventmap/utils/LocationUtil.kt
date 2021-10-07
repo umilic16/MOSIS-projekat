@@ -7,16 +7,27 @@ import android.os.Build
 import android.provider.Settings
 import pub.devrel.easypermissions.EasyPermissions
 import android.R
+import android.annotation.SuppressLint
 
 import android.content.Intent
 
 import android.content.DialogInterface
 import android.location.LocationManager.GPS_PROVIDER
 import androidx.lifecycle.MutableLiveData
+import com.example.eventmap.presentation.utils.GpsStatusListener
+import com.example.eventmap.presentation.utils.LocationPermissionStatusListener
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.firebase.firestore.GeoPoint
 import java.lang.Exception
 
 object LocationUtil {
+    @SuppressLint("StaticFieldLeak")
+    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    @SuppressLint("StaticFieldLeak")
+    lateinit var gpsStatusListener: GpsStatusListener
+    @SuppressLint("StaticFieldLeak")
+    lateinit var locationPermissionStatusListener: LocationPermissionStatusListener
+
     fun hasLocationPermissions(context: Context) =
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             EasyPermissions.hasPermissions(

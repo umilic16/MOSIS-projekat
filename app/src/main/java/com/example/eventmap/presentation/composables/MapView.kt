@@ -37,7 +37,7 @@ fun MapView(navController: NavController, viewModel: UsersViewModel) {
     val context = LocalContext.current
     val mapView = rememberMapViewLifecycle()
     val allUsersWithoutCurrent = viewModel.allUsers.value
-    val allIconsWithoutCurrent = viewModel.allPicturesAsThumbnails.value
+    //val allIconsWithoutCurrent = viewModel.allPicturesAsThumbnails.value
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView({ mapView }) {
             CoroutineScope(Dispatchers.Main).launch {
@@ -57,13 +57,13 @@ fun MapView(navController: NavController, viewModel: UsersViewModel) {
                     Toast.makeText(context, "No permission to see your location!", Toast.LENGTH_SHORT).show()
                 }
                 markEvents(map)
-                markUsers(map, allUsersWithoutCurrent, allIconsWithoutCurrent)
+                markUsers(map, allUsersWithoutCurrent)
             }
         }
     }
 }
 
-fun markUsers(map: GoogleMap,users: List<User>?, icons: HashMap<String,Bitmap>?){
+fun markUsers(map: GoogleMap,users: List<User>?){
     users?.let{
         for(user in it){
             //kreiraj hash map za markere
@@ -78,13 +78,7 @@ fun markUsers(map: GoogleMap,users: List<User>?, icons: HashMap<String,Bitmap>?)
                             }
                         )
                         this.position(LatLng(user.location.latitude, user.location.longitude))
-                        icons?.let{
-                            if(icons[user.userId] != null){
-                                this.icon(BitmapDescriptorFactory.fromBitmap(icons[user.userId]))
-                            }else{
-                                this.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
-                            }
-                        }
+                        this.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
                     })
                 }else{
                     allMarkers[user.userId]!!.position = LatLng(user.location.latitude, user.location.longitude)
