@@ -1,10 +1,13 @@
 package com.example.eventmap.utils
 
+import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.media.Image
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.util.Log
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.example.eventmap.data.Event
 import com.example.eventmap.data.User
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
@@ -18,8 +21,12 @@ import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+
 object DbAdapter {
     fun checkIfLoggedIn(): Boolean {
         val auth = FirebaseAuth.getInstance()
@@ -147,15 +154,45 @@ object DbAdapter {
         }
     }
 
-    fun setCurrentPicture(viewModel: UsersViewModel) = CoroutineScope(Dispatchers.IO).launch {
+    fun setCurrentPictureUrl(viewModel: UsersViewModel) = CoroutineScope(Dispatchers.IO).launch {
         try {
             val auth = FirebaseAuth.getInstance()
-            val bytes = Firebase.storage.reference.child("images/${auth.currentUser?.uid}")
-                .getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
-            val picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            val imageRef = Firebase.storage.reference.child("images/${auth.currentUser?.uid}")
+            //val bytes = imageRef.getBytes(Constants.MAX_DOWNLOAD_SIZE).await()
+            val imageUrl = imageRef.downloadUrl.await()
+            //val picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             withContext(Dispatchers.Main) {
-                viewModel.setCurrentPicture(picture)
+                //viewModel.setCurrentPicture(picture)
+                viewModel.setCurrentPictureUrl(imageUrl)
             }
+        } catch (e: Exception) {
+            Log.d("DbAdapter_Exception", e.message.toString())
+        }
+    }
+
+    fun getPictureAndAddToViewModel(viewModel: UsersViewModel, userId: String, context: Context) = CoroutineScope(Dispatchers.IO).launch {
+        //lateinit var bitmap: Bitmap
+        try {
+            Log.d("Icon_Debug", "Finding image for: $userId")
+            val url = Firebase.storage.reference.child("images/$userId").downloadUrl.await()
+            Glide
+                .with(context)
+                .asBitmap()
+                .load(url)
+                .override(100, 100)
+                .circleCrop()
+                .into(object : CustomTarget<Bitmap>() {
+                    override fun onResourceReady(
+                        resource: Bitmap,
+                        transition: Transition<in Bitmap>?
+                    ) {
+                        viewModel.addThumbnailToList(userId, resource)
+                        Log.d("Icon_Debug", "getting from db : $resource")
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                    }
+                })
         } catch (e: Exception) {
             Log.d("DbAdapter_Exception", e.message.toString())
         }

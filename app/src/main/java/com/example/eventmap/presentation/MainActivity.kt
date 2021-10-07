@@ -11,7 +11,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
@@ -34,7 +33,7 @@ import com.example.eventmap.services.TrackingService.Companion.isServiceRunning
 import com.example.eventmap.utils.Checkers.checkIfCanTrackLocation
 import com.example.eventmap.utils.Constants.LOCATION_PERMISSION_REQUEST_CODE
 import com.example.eventmap.utils.DbAdapter.checkIfLoggedIn
-import com.example.eventmap.utils.DbAdapter.setCurrentPicture
+import com.example.eventmap.utils.DbAdapter.setCurrentPictureUrl
 import com.example.eventmap.utils.DbAdapter.setCurrentUser
 import com.example.eventmap.utils.LocationUtil.hasLocationPermissions
 import com.example.eventmap.utils.TrackingCommands.startOrResumeTrackingService
@@ -56,8 +55,6 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
         lateinit var gpsStatusListener: GpsStatusListener
         lateinit var locationPermissionStatusListener: LocationPermissionStatusListener
     }
-
-
     //ne garantuje
     override fun onDestroy() {
         super.onDestroy()
@@ -67,6 +64,8 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //FirebaseAuth.getInstance().signOut()
+        //try to find current user in firebase if not found its deleted so sign out
         sharedPref = getSharedPreferences("sharedPref", MODE_PRIVATE)
         FirebaseMessaging.getInstance().token.addOnSuccessListener {
             token = it
@@ -80,7 +79,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
         //tracking service takodje prati promene u statusu gps i permisija
         //zbog situacija kad je main activity stopiran
         gpsStatusListener.observe(this,{
-            if(checkIfCanTrackLocation(this)){
+            if(checkIfCanTrackLocation(this) && checkIfLoggedIn()){
                 startOrResumeTrackingService(this)
             }else if(isServiceRunning){
                 //da se ne bi pozvalo stop tracking service 2 puta
@@ -91,7 +90,7 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
         })
         //location permission observer
         locationPermissionStatusListener.observe(this,{
-            if(checkIfCanTrackLocation(this)){
+            if(checkIfCanTrackLocation(this) && checkIfLoggedIn()){
                 startOrResumeTrackingService(this)
             }else if(isServiceRunning){
                 isServiceRunning = false
@@ -107,14 +106,12 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                 if(checkIfCanTrackLocation(this)){
                     startOrResumeTrackingService(this)
                 }
-                //dijalog da se ukljuci lokacija
                 //procedura nakon logovanja
                 setCurrentUser(usersViewModel)
-                //register je sam postavlja jer je vec ucitao
-                if(usersViewModel.picture != null){
-                    setCurrentPicture(usersViewModel)
-                }
-                addUsersListener(usersViewModel)
+                setCurrentPictureUrl(usersViewModel)
+                addUsersListener(usersViewModel, this)
+                //na prvi login se ucitavaju sve slike
+                //setAllPictures(usersViewModel, this)
                 isFirstStart = false
             } else if(!isFirstStart){
                 //procedura nakon sign out
@@ -127,13 +124,12 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
                 //reset view model
                 usersViewModel.setAllUsers(null)
                 usersViewModel.setCurrentUser(null)
-                usersViewModel.setCurrentPicture(null)
+                usersViewModel.setCurrentPictureUrl(null)
             }
         })
         setContent {
             EventMapTheme {
                 Surface(
-                    color = MaterialTheme.colors.background,
                     modifier = Modifier.fillMaxSize()
                 ) {
                     val navController = rememberNavController()

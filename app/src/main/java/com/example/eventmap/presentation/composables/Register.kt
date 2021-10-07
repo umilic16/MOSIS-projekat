@@ -76,15 +76,21 @@ fun Register(navController: NavController, viewModel: UsersViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
         ) {
-            //Log.d("Image_debug", imageUri.toString())
-            ImageHolder(
-                bitmap = bitmap.value.asImageBitmap(),
+            BoxWithConstraints(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(120.dp)
-                    .clickable {
-                        launcher.launch("image/*")
-                    }
-            )
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.23f)
+            ) {
+                ImageHolder(
+                    bitmap = bitmap.value.asImageBitmap(),
+                    modifier = Modifier
+                        .size(maxHeight)
+                        .clickable {
+                            launcher.launch("image/*")
+                        }
+                )
+            }
         }
         Spacer(modifier = Modifier.padding(PaddingSmall))
         Text(
@@ -176,16 +182,11 @@ fun Register(navController: NavController, viewModel: UsersViewModel) {
                                     saveUser(
                                         user, imageUri!!
                                     )
-                                    //viewModel.setCurrentUser(user)
-                                    viewModel.setCurrentPicture(bitmap = bitmap.value)
                                     viewModel.setLoggedIn(true)
-                                    //setCurrentPicture(viewModel)
-                                    //Log.d("LogDebug", navController.graph.startDestinationRoute.toString())
                                     navController.popBackStack("Login", true)
                                     navController.navigate("Home")
                                 }
                                 .addOnFailureListener {
-                                    //Log.d("Register_Exception", it.toString())
                                     Toast.makeText(
                                         context,
                                         "Authentication error\n$it.localizedMessage",

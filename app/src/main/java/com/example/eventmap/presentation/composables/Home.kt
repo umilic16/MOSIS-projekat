@@ -37,7 +37,7 @@ const val TOPIC = "/topics/myTopic"
 fun Home(navController: NavController, viewModel: UsersViewModel) {
     //Log.d("LogDebug",navController.previousBackStackEntry.toString())
     val currentUser = viewModel.currentUser.value
-    val users = viewModel.allUsers.value
+    val allUsersWithoutCurrent = viewModel.allUsers.value
     //baca exception da je current user null
     //if(currentUser!= null) {
     Column(
@@ -52,7 +52,7 @@ fun Home(navController: NavController, viewModel: UsersViewModel) {
             verticalArrangement = Arrangement.spacedBy(PaddingLarge)
         ) {
             //Log.d("HelpMe", "USERS: $users\nCURRENT: $currentUser")
-            users?.let{ allUsers ->
+            allUsersWithoutCurrent?.let{ allUsers ->
                 items(items = allUsers) { user ->
                     UserLazyColumn(user = user, currentUser = currentUser!!)
                 }
@@ -69,7 +69,7 @@ fun UserLazyColumn(user: User, currentUser: User){
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(5.dp))
-            .shadow(elevation = 10.dp)
+            .shadow(elevation = 5.dp)
             .background(DefaultWhite)
             .padding(3.dp)
     ){

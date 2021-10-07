@@ -1,10 +1,13 @@
 package com.example.eventmap.presentation.composables
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
@@ -13,21 +16,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.eventmap.R
 import com.example.eventmap.components.CustomTextField
-import com.example.eventmap.components.ImageHolder
-import com.example.eventmap.data.User
 import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.utils.DbAdapter.updateUsername
 import com.google.firebase.auth.FirebaseAuth
+import com.skydoves.landscapist.CircularReveal
+import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun AccountView(navController: NavController, viewModel: UsersViewModel) {
@@ -35,8 +42,8 @@ fun AccountView(navController: NavController, viewModel: UsersViewModel) {
     val username = remember { mutableStateOf("") }
     val context = LocalContext.current
     val user = viewModel.currentUser.value
-    val picture = viewModel.picture
-    //Log.d("HelpMe", "USER: $user")
+    //val picture = viewModel.picture.value
+    val imageUrl = viewModel.imageUrl.value
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
@@ -51,19 +58,37 @@ fun AccountView(navController: NavController, viewModel: UsersViewModel) {
             fontSize = 20.sp,
             modifier = Modifier.fillMaxWidth()
         )*/
-        Spacer(modifier = Modifier.padding(PaddingSmall))
-        picture.value?.let {
-            ImageHolder(
-                bitmap = it.asImageBitmap(),
+        Spacer(modifier = Modifier.padding(PaddingMedium))
+        imageUrl?.let {
+            BoxWithConstraints(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(120.dp)
-                //.rotate(90f)
-            )
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.23f)) {
+                /*ImageHolder(
+                    bitmap = it.asImageBitmap(),
+                    modifier = Modifier.size(maxHeight)
+                    //.rotate(90f)
+                )*/
+                GlideImage(
+                    imageModel = it,
+                    contentScale = ContentScale.Crop,
+                    placeHolder = ImageBitmap.imageResource(id = R.drawable.profile_circle),
+                    //error = ImageBitmap.imageResource(id = R.drawable.ic_baseline_error_24),
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .border(1.dp, DefaultWhite, CircleShape)
+                        .shadow(elevation = 15.dp, CircleShape)
+                        .size(maxHeight)
+                )
+            }
         }
         Spacer(modifier = Modifier.padding(PaddingMedium))
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(PaddingSmall),
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.6f)
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.6f)
         ){
             item{
                 CustomTextField(
@@ -117,7 +142,7 @@ fun AccountView(navController: NavController, viewModel: UsersViewModel) {
                 )
             }
         }
-        Spacer(modifier = Modifier.padding(PaddingMedium))
+        Spacer(modifier = Modifier.padding(PaddingSmall))
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,

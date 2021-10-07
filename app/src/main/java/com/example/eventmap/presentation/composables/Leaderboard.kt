@@ -21,8 +21,10 @@ import com.example.eventmap.presentation.viewmodels.UsersViewModel
 
 @Composable
 fun Leaderboard(navController: NavController, viewModel: UsersViewModel) {
-    val allUsers = viewModel.allUsers.value?.add(viewModel.currentUser.value!!) as List<User>
-    val sortedUsers = allUsers.sortedByDescending { it.points }
+    val allUsers = viewModel.allUsers.value?.also {
+        it.add(viewModel.currentUser.value!!)
+    }
+    val sortedUsers = allUsers?.sortedByDescending { it.points }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,

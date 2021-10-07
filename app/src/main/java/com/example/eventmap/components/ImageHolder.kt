@@ -27,5 +27,6 @@ fun ImageHolder(
         contentScale = ContentScale.Crop,
         modifier = modifier
             .clip(CircleShape)
+            .border(1.dp, DefaultWhite, CircleShape)
     )
 }
