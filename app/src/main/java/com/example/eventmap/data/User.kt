@@ -8,7 +8,7 @@ data class User(
     val username: String? = "",
     val numOfFriends: Int = 0,
     val numOfEvents: Int = 0,
-    val points: Int=0,
+    val points: Int = 0,
     val password: String = "",
     val friends: List<String>? = listOf<String>(),
     val receivedRequests: List<String>? = listOf<String>(),

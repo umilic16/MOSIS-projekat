@@ -1,6 +1,7 @@
 package com.example.eventmap.services
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -8,6 +9,7 @@ import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
 import android.location.Location
+import android.media.RingtoneManager
 import android.os.Build
 import android.os.Looper
 import android.util.Log
@@ -42,7 +44,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-private const val CHANNEL_ID = "tracking_channel"
+private const val TRACKING_CHANNEL_ID = "tracking_channel"
+private const val NEARBY_CHANNEL_ID = "nearby_channel"
 
 class TrackingService() : LifecycleService(){
 
@@ -50,6 +53,8 @@ class TrackingService() : LifecycleService(){
     private var serviceKilled = false
     private lateinit var curNotification: NotificationCompat.Builder
     private lateinit var notificationManager: NotificationManager
+    //private lateinit var nearbyUsersNotification: NotificationCompat.Builder
+    //private lateinit var nearbyEventsNotification: NotificationCompat.Builder
 
     companion object{
         val isTracking = MutableLiveData<Boolean>()
@@ -199,6 +204,7 @@ class TrackingService() : LifecycleService(){
         //val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(notificationManager = notificationManager)
+            createChannelForNearbyNotifications(notificationManager = notificationManager)
         }
         isTracking.postValue(true)
         startForeground(TRACKING_NOTIFICATION_ID, curNotification.build())
@@ -211,7 +217,17 @@ class TrackingService() : LifecycleService(){
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(notificationManager: NotificationManager){
         val channelName="Tracking"
-        val channel = NotificationChannel(CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_LOW)
+        val channel = NotificationChannel(TRACKING_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_LOW)
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createChannelForNearbyNotifications(notificationManager: NotificationManager){
+        val channelName="Nearby"
+        val channel = NotificationChannel(NEARBY_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
+            setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), Notification.AUDIO_ATTRIBUTES_DEFAULT)
+            enableVibration(true)
+        }
         notificationManager.createNotificationChannel(channel)
     }
 
@@ -257,7 +273,7 @@ class TrackingService() : LifecycleService(){
         }
     }
 
-    private fun getDefaultNotificationBuilder() = NotificationCompat.Builder(this, CHANNEL_ID)
+    private fun getDefaultNotificationBuilder() = NotificationCompat.Builder(this, TRACKING_CHANNEL_ID)
         .setAutoCancel(false)
         .setOngoing(true)
         .setSmallIcon(R.drawable.logo)
@@ -265,8 +281,10 @@ class TrackingService() : LifecycleService(){
         .setContentText("Tracking service is running")
         .setContentIntent(getMainActivityPendingIntent())
 
-    private fun getNearbyNotificationBuilder() = NotificationCompat.Builder(this, CHANNEL_ID)
+    private fun getNearbyNotificationBuilder() = NotificationCompat.Builder(this, NEARBY_CHANNEL_ID)
         .setSmallIcon(R.drawable.logo)
+        .setAutoCancel(true)
+        .setOnlyAlertOnce(true)
         .setContentIntent(getMainActivityPendingIntent())
 
     private fun getMainActivityPendingIntent() = PendingIntent.getActivity(

@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
@@ -19,6 +20,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.eventmap.presentation.theme.ui.DarkBlue
 import com.example.eventmap.presentation.theme.ui.DarkText
 import com.example.eventmap.presentation.theme.ui.DefaultWhite
 import com.example.eventmap.presentation.theme.ui.HintGray
@@ -42,6 +44,7 @@ fun CustomTextField(
         fontWeight = FontWeight.W500,
         fontSize = 14.sp
     ),
+    leadingIcon: @Composable()(() -> Unit)? = {},
     isPasswordVisible: Boolean = false,
     onPasswordToggleClick: (Boolean) -> Unit = {},
     showIcon: Boolean =  keyboardType == KeyboardType.Password

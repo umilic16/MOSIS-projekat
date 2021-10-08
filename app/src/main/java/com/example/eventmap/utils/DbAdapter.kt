@@ -101,6 +101,10 @@ object DbAdapter {
         return events
     }
 
+    fun likeEvent(){
+
+    }
+
     fun updateLocation(newLocation: GeoPoint?) = CoroutineScope(Dispatchers.IO).launch {
         try {
             val auth = FirebaseAuth.getInstance()

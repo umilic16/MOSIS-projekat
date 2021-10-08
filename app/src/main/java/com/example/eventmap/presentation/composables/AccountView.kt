@@ -1,6 +1,5 @@
 package com.example.eventmap.presentation.composables
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,7 +32,6 @@ import com.example.eventmap.presentation.theme.ui.*
 import com.example.eventmap.presentation.viewmodels.UsersViewModel
 import com.example.eventmap.utils.DbAdapter.updateUsername
 import com.google.firebase.auth.FirebaseAuth
-import com.skydoves.landscapist.CircularReveal
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
